@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food Diary v10.0</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- タブ -->
+  <div id="tabs">
+    <button class="tab active" data-target="dashboard">Dashboard</button>
+    <button class="tab" data-target="log">Log</button>
+    <button class="tab" data-target="report">Report</button>
+    <button class="tab" data-target="settings">Settings</button>
+  </div>
+
+  <!-- ▼▼▼ 各画面 ▼▼▼ -->
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="page active">
+    <h2>Dashboard</h2>
+
+    <section class="dash-block" id="todaySummary"></section>
+    <section class="dash-block" id="improvementBlock"></section>
+    <section class="dash-block" id="tomorrowPrediction"></section>
+    <section class="dash-block" id="weeklySummary"></section>
+    <section class="dash-block" id="monthlySummary"></section>
+    <section class="dash-block" id="yearlySummary"></section>
+    <section class="dash-block" id="trendSummary"></section>
+    <section class="dash-block" id="annualPlanBlock"></section>
+
+    <section class="dash-block">
+      <div class="dash-title">今日のグラフ</div>
+      <canvas id="todayChart"></canvas>
+    </section>
+
+    <section class="dash-block">
+      <div class="dash-title">週間グラフ</div>
+      <canvas id="weeklyChart"></canvas>
+    </section>
+
+    <section class="dash-block">
+      <div class="dash-title">月間グラフ</div>
+      <canvas id="monthlyChart"></canvas>
+    </section>
+
+    <section class="dash-block">
+      <div class="dash-title">年間グラフ</div>
+      <canvas id="yearlyChart"></canvas>
+    </section>
+
+    <section class="dash-block">
+      <div class="dash-title">傾向グラフ</div>
+      <canvas id="trendChart"></canvas>
+    </section>
+
+  </div>
+
+  <!-- Log -->
+  <div id="log" class="page">
+    <h2>Log</h2>
+    <div id="logInputArea"></div>
+    <div id="logList"></div>
+  </div>
+
+  <!-- Report -->
+  <div id="report" class="page">
+    <h2>Report</h2>
+    <div id="weeklyContainer"></div>
+    <div id="monthlyContainer"></div>
+    <div id="yearlyContainer"></div>
+  </div>
+
+  <!-- Settings -->
+  <div id="settings" class="page">
+    <h2>Settings</h2>
+
+    <button id="enableNotify">通知を有効化</button>
+    <br><br>
+
+    <button id="exportBtn">バックアップ（JSON）</button>
+    <input type="file" id="importFile" style="display:none;">
+    <button id="importBtn">復元（JSON）</button>
+
+  </div>
+
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
