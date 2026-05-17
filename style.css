@@ -1,113 +1,277 @@
+/* =========================
+   Base
+========================= */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
-  margin: 12px;
-  background: #f5f6fa;
-  color: #2f3542;
-  font-size: 14px;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+#app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 50px;
+}
+
+h1, h2, h3 {
+  margin: 0 0 10px;
+}
+
+/* =========================
+   Header / Tabs
+========================= */
+.app-header {
+  background: #222;
+  color: #fff;
+  padding: 15px;
+  text-align: center;
 }
 
 .tabs {
   display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
+  overflow-x: auto;
+  background: #333;
 }
+
 .tab-button {
-  padding: 8px 12px;
-  border-radius: 6px;
+  flex: 1;
+  padding: 12px;
   border: none;
-  background: #dfe4ea;
+  background: #333;
+  color: #ccc;
+  font-size: 14px;
 }
+
 .tab-button.active {
-  background: #2ecc71;
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+}
+
+/* =========================
+   Main Content
+========================= */
+.app-main {
+  padding: 15px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* =========================
+   Buttons
+========================= */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.log-btn,
+.unit-btn,
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.log-btn {
+  background: #e8e8e8;
+}
+
+.log-btn:hover {
+  background: #dcdcdc;
+}
+
+.unit-btn {
+  background: #ddd;
+}
+
+.unit-btn.active {
+  background: #4caf50;
   color: #fff;
 }
 
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-.input-block {
-  background: #fff;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+.primary-btn {
+  background: #007bff;
+  color: #fff;
+  margin-top: 10px;
 }
-input {
+
+.secondary-btn {
+  background: #666;
+  color: #fff;
+}
+
+.danger-btn {
+  background: #d9534f;
+  color: #fff;
+}
+
+/* =========================
+   Inputs
+========================= */
+.log-input-block {
+  margin-bottom: 12px;
+}
+
+.log-input-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
   width: 100%;
   padding: 8px;
+  border: 1px solid #bbb;
   border-radius: 6px;
-  border: 1px solid #dcdde1;
-  margin-bottom: 6px;
-}
-#addLogBtn {
-  width: 100%;
-  padding: 10px;
-  background: #2ecc71;
-  color: #fff;
-  border-radius: 6px;
-  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
-.log-list {
-  background: #fff;
-  padding: 12px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+textarea {
+  resize: vertical;
 }
-.log-item-row {
+
+/* =========================
+   Suggestions
+========================= */
+.suggestions {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: none;
+  position: relative;
+  z-index: 10;
+}
+
+.suggestions div {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.suggestions div:hover {
+  background: #eee;
+}
+
+/* =========================
+   Log List
+========================= */
+.log-list-wrapper {
+  margin-top: 20px;
+}
+
+#logList {
+  background: #fff;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.log-item {
   display: flex;
   justify-content: space-between;
   padding: 6px 0;
-  border-bottom: 1px solid #f1f2f6;
+  border-bottom: 1px solid #eee;
 }
-.log-delete-btn {
-  padding: 4px 8px;
-  background: #ff6b81;
+
+.log-item:last-child {
+  border-bottom: none;
+}
+
+.delete-log-btn {
+  background: #d9534f;
   color: #fff;
-  border-radius: 4px;
   border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.dashboard-card {
+/* =========================
+   Dashboard / Report
+========================= */
+.date-info {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+#dashboardContent,
+#reportContent {
   background: #fff;
-  padding: 14px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.dashboard-label {
-  font-size: 13px;
-  color: #57606f;
-}
-.dashboard-value {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 4px;
+  padding: 15px;
+  border-radius: 6px;
 }
 
+/* =========================
+   Settings
+========================= */
+.settings-section {
+  background: #fff;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.settings-row input[type="number"],
+.settings-row input[type="checkbox"] {
+  width: 120px;
+}
+
+.checkbox-row {
+  align-items: center;
+}
+
+.danger-row {
+  margin-top: 10px;
+}
+
+/* =========================
+   Guide
+========================= */
 #guideContent {
   background: #fff;
-  padding: 14px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 15px;
+  border-radius: 6px;
 }
 
-#tab-settings input {
-  margin-bottom: 6px;
-}
-#tab-settings button {
-  margin-top: 6px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-}
-#backupBtn, #restoreBtn {
-  background: #1e90ff;
-}
-#clearTodayBtn {
-  background: #ffa502;
-}
-#clearAllLogsBtn, #resetAppBtn {
-  background: #ff4757;
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 600px) {
+  .settings-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .log-input-row {
+    flex-direction: column;
+  }
+
+  .settings-row input[type="number"],
+  .settings-row input[type="checkbox"] {
+    width: 100%;
+  }
 }
