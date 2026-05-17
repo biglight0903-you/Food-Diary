@@ -119,6 +119,20 @@ h1, h2, h3 {
   color: #fff;
 }
 
+/* 選択されたカテゴリーボタン */
+.btn.selected {
+  background: #1e90ff;
+  color: #fff;
+  border-color: #1e90ff;
+}
+
+/* アクティブなタブ */
+.tab-button.active {
+  background: #2ecc71;
+  color: #fff;
+}
+
+
 /* =========================
    Inputs
 ========================= */
@@ -274,4 +288,6 @@ textarea {
   .settings-row input[type="checkbox"] {
     width: 100%;
   }
+
+   
 }
