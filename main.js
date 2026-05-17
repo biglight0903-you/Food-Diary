@@ -17,7 +17,7 @@ function todayStr() {
 }
 
 /* =========================
-   Part1: タブ切り替え（完全版）
+   Part1: タブ切り替え（完全動作版）
 ========================= */
 
 document.querySelectorAll(".tab-button").forEach(btn => {
@@ -33,12 +33,26 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     if (target) target.classList.add("active");
 
     // タブごとの処理
-    if (btn.dataset.tab === "dashboard") renderDashboard();
-    if (btn.dataset.tab === "report") renderReport();
-    if (btn.dataset.tab === "guide") renderGuide();
-    if (btn.dataset.tab === "log") renderLogList();
+    switch (btn.dataset.tab) {
+      case "log":
+        renderLogList();
+        break;
+      case "dashboard":
+        renderDashboard();
+        break;
+      case "report":
+        renderReport();
+        break;
+      case "guide":
+        renderGuide();
+        break;
+      case "settings":
+        // 特に処理なし
+        break;
+    }
   });
 });
+
 
 /* =========================
    Part2: ログ追加（v11）
