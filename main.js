@@ -363,9 +363,11 @@ document.getElementById("resetAppBtn").addEventListener("click", () => {
 
 function renderGuide() {
   const box = document.getElementById("guideContent");
+  if (!box) return;
+
   box.innerHTML = `
-    <h2>Guide</h2>
-    <p>Food / Drink / サプリ・体調・運動を、カテゴリボタン＋入力欄から記録できます。</p>
-    <p>Settings で目標値やサプリ規定量、通知設定、バックアップなどを管理します。</p>
+    <h3>Guide</h3>
+    <p>ここにガイド内容を入れる</p>
   `;
 }
+
