@@ -1,100 +1,76 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Food Diary v10.0</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Food Diary v10.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <header class="app-header">
+    <h1>Food Diary v10.0</h1>
+  </header>
 
-<div id="app">
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="log">Log</button>
+    <button class="tab-btn" data-tab="report">Report</button>
+    <button class="tab-btn" data-tab="guide">Guide</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </nav>
 
-  <!-- タブ -->
-  <div id="tabs">
-    <button class="tab active" data-target="dashboard">Dashboard</button>
-    <button class="tab" data-target="log">Log</button>
-    <button class="tab" data-target="report">Report</button>
-    <button class="tab" data-target="settings">Settings</button>
-  </div>
-
-  <!-- ▼▼▼ 各画面 ▼▼▼ -->
-
-  <!-- Dashboard -->
-  <div id="dashboard" class="page active">
-    <h2>Dashboard</h2>
-
-    <section class="dash-block" id="todaySummary"></section>
-    <section class="dash-block" id="improvementBlock"></section>
-    <section class="dash-block" id="tomorrowPrediction"></section>
-    <section class="dash-block" id="weeklySummary"></section>
-    <section class="dash-block" id="monthlySummary"></section>
-    <section class="dash-block" id="yearlySummary"></section>
-    <section class="dash-block" id="trendSummary"></section>
-    <section class="dash-block" id="annualPlanBlock"></section>
-
-    <section class="dash-block">
-      <div class="dash-title">今日のグラフ</div>
-      <canvas id="todayChart"></canvas>
+  <main class="tab-contents">
+    <!-- Dashboard -->
+    <section id="dashboard" class="tab-content active">
+      <div id="dashboardToday"></div>
+      <div id="dashboardTrends"></div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-title">週間グラフ</div>
-      <canvas id="weeklyChart"></canvas>
+    <!-- Log -->
+    <section id="log" class="tab-content">
+      <div id="logInputArea"></div>
+      <div id="logList"></div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-title">月間グラフ</div>
-      <canvas id="monthlyChart"></canvas>
+    <!-- Report -->
+    <section id="report" class="tab-content">
+      <div id="weeklyReport"></div>
+      <div id="monthlyReport"></div>
+      <div id="yearlyReport"></div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-title">年間グラフ</div>
-      <canvas id="yearlyChart"></canvas>
+    <!-- Guide -->
+    <section id="guide" class="tab-content">
+      <div id="guideContent"></div>
     </section>
 
-    <section class="dash-block">
-      <div class="dash-title">傾向グラフ</div>
-      <canvas id="trendChart"></canvas>
+    <!-- Settings -->
+    <section id="settings" class="tab-content">
+      <div class="dash-block">
+        <div class="dash-title">設定</div>
+        <div class="setting-row">
+          <label>
+            <input type="checkbox" id="notify18" />
+            18:00 に「水 200ml」を通知
+          </label>
+        </div>
+        <div class="setting-row">
+          <label>
+            目標水分量（ml）：
+            <input type="number" id="targetWater" min="0" step="100" />
+          </label>
+        </div>
+        <div class="setting-row">
+          <button id="backupBtn">バックアップをダウンロード</button>
+        </div>
+        <div class="setting-row">
+          <input type="file" id="restoreFile" />
+          <button id="restoreBtn">バックアップから復元</button>
+        </div>
+      </div>
     </section>
+  </main>
 
-  </div>
-
-  <!-- Log -->
-  <div id="log" class="page">
-    <h2>Log</h2>
-    <div id="logInputArea"></div>
-    <div id="logList"></div>
-  </div>
-
-  <!-- Report -->
-  <div id="report" class="page">
-    <h2>Report</h2>
-    <div id="weeklyContainer"></div>
-    <div id="monthlyContainer"></div>
-    <div id="yearlyContainer"></div>
-  </div>
-
-  <!-- Settings -->
-  <div id="settings" class="page">
-    <h2>Settings</h2>
-
-    <button id="enableNotify">通知を有効化</button>
-    <br><br>
-
-    <button id="exportBtn">バックアップ（JSON）</button>
-    <input type="file" id="importFile" style="display:none;">
-    <button id="importBtn">復元（JSON）</button>
-
-  </div>
-
-</div>
-
-<script src="main.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
