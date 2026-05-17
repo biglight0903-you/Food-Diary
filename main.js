@@ -340,8 +340,82 @@ resetAppBtn.addEventListener("click", () => {
 
 function renderGuide() {
   guideContent.innerHTML = `
-    <h3>Guide</h3>
-    <p>Food / Drink / サプリ・体調・運動を記録できます。</p>
-    <p>Settings で目標や通知を設定できます。</p>
+    <div class="guide-wrapper">
+
+      <h2>減量システム設計書 v9.2</h2>
+
+      <div class="guide-box info">
+        <div>・迷ったらプロテインを選択する。</div>
+        <div>・夜は糖質を入れず、睡眠中の脂肪燃焼を妨げない。</div>
+        <div>・炎症を抑えることで、減量スピードと体調を両立させる。</div>
+        <div>・睡眠の質が、翌日の食欲・代謝・意思決定を左右する。</div>
+      </div>
+
+      <h3>朝（朝食後）</h3>
+
+      <div class="guide-card">
+        <ul>
+          <li><span class="highlight">ビタミンD3</span>：1粒</li>
+          <li><span class="highlight">マルチビタミン</span>：1粒</li>
+        </ul>
+      </div>
+
+      <h3>昼（昼食後）</h3>
+
+      <div class="guide-card">
+        <ul>
+          <li><span class="highlight">オメガ3</span>：1粒</li>
+        </ul>
+      </div>
+
+      <h3>夜（夕食後）</h3>
+
+      <div class="guide-card">
+        <ul>
+          <li><span class="highlight">オメガ3</span>：1粒</li>
+          <li><span class="highlight">亜鉛</span>：1粒</li>
+        </ul>
+      </div>
+
+      <h3>就寝90分前</h3>
+
+      <div class="guide-card">
+        <ul>
+          <li><span class="highlight">マグネシウム</span>：1粒</li>
+        </ul>
+      </div>
+
+      <h3>食事テンプレ</h3>
+
+      <table class="guide-table">
+        <tr>
+          <th>タイミング</th>
+          <th>内容</th>
+        </tr>
+
+        <tr>
+          <td>朝</td>
+          <td>卵＋納豆＋味噌汁＋<span class="highlight">プロテイン</span></td>
+        </tr>
+
+        <tr>
+          <td>昼</td>
+          <td>鶏むね肉＋野菜＋白米少量</td>
+        </tr>
+
+        <tr>
+          <td>夜</td>
+          <td><span class="highlight">プロテイン</span>＋<span class="highlight">サイリウム</span></td>
+        </tr>
+      </table>
+
+      <div class="guide-box warning">
+        <strong>クリティカルルール</strong><br>
+        ・夜の糖質は禁止<br>
+        ・迷ったらプロテイン<br>
+        ・空腹は水かタンパク質で処理
+      </div>
+
+    </div>
   `;
 }
