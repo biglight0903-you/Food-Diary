@@ -451,18 +451,26 @@ function renderDashboard() {
   let coffeeCount = 0;
   let lateSnack = false;
 
-  todayLogs.forEach(l => {
-    if (l.category === "水" || (l.unit === "ml" && l.name.includes("水"))) {
-      waterTotal += Number(l.amount || 0);
-    }
-    if (l.category === "コーヒー" || l.name.includes("コーヒー")) {
-      coffeeCount++;
-    }
-    if (l.category === "夜食") {
-      const hour = new Date(l.time).getHours();
-      if (hour >= 21) lateSnack = true;
-    }
-  });
+todayLogs.forEach(l => {
+  if (
+    l.category === "水" ||
+    (l.unit === "ml" && l.name && l.name.includes("水"))
+  ) {
+    waterTotal += Number(l.amount || 0);
+  }
+
+  if (
+    l.category === "コーヒー" ||
+    (l.name && l.name.includes("コーヒー"))
+  ) {
+    coffeeCount++;
+  }
+
+  if (l.category === "夜食") {
+    const hour = new Date(l.time).getHours();
+    if (hour >= 21) lateSnack = true;
+  }
+});
 
   content.innerHTML = `
     <div><strong>水分摂取：</strong> ${waterTotal} ml</div>
