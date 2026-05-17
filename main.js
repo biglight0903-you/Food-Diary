@@ -471,33 +471,57 @@ function renderDashboard() {
   let coffeeCount = 0;
   let lateSnack = false;
 
-todayLogs.forEach(l => {
-  if (
-    l.category === "水" ||
-    (l.unit === "ml" && l.name && l.name.includes("水"))
-  ) {
-    waterTotal += Number(l.amount || 0);
-  }
+  todayLogs.forEach(l => {
+    if (l.category === "水" || (l.unit === "ml" && l.name && l.name.includes("水"))) {
+      waterTotal += Number(l.amount || 0);
+    }
+    if (l.category === "コーヒー" || (l.name && l.name.includes("コーヒー"))) {
+      coffeeCount++;
+    }
+    if (l.category === "夜食") {
+      const hour = new Date(l.time).getHours();
+      if (hour >= 21) lateSnack = true;
+    }
+  });
 
-  if (
-    l.category === "コーヒー" ||
-    (l.name && l.name.includes("コーヒー"))
-  ) {
-    coffeeCount++;
-  }
+  const targetWater = settings.targetWater || 0;
+  const coffeeLimit = settings.coffeeLimit || 0;
 
-  if (l.category === "夜食") {
-    const hour = new Date(l.time).getHours();
-    if (hour >= 21) lateSnack = true;
-  }
-});
+  const waterRate = targetWater ? Math.round((waterTotal / targetWater) * 100) : null;
+  const coffeeRate = coffeeLimit ? Math.round((coffeeCount / coffeeLimit) * 100) : null;
 
   content.innerHTML = `
-    <div><strong>水分摂取：</strong> ${waterTotal} ml</div>
-    <div><strong>コーヒー：</strong> ${coffeeCount} 杯</div>
-    <div><strong>深夜食：</strong> ${lateSnack ? "あり" : "なし"}</div>
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="dashboard-label">水分摂取</div>
+        <div class="dashboard-value">${waterTotal} ml</div>
+        <div class="dashboard-sub">
+          目標：${targetWater || "-"} ml
+          ${waterRate !== null ? `（${waterRate}%）` : ""}
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dashboard-label">コーヒー</div>
+        <div class="dashboard-value">${coffeeCount} 杯</div>
+        <div class="dashboard-sub">
+          上限：${coffeeLimit || "-"} 杯
+          ${coffeeRate !== null ? `（${coffeeRate}%）` : ""}
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="dashboard-label">深夜食</div>
+        <div class="dashboard-value">${lateSnack ? "あり" : "なし"}</div>
+        <div class="dashboard-sub">
+          21時以降の「夜食」カテゴリを検出
+        </div>
+      </div>
+    </div>
   `;
 }
+
+
 
 /* -------------------------
    Report
@@ -546,165 +570,170 @@ function renderGuide() {
   const box = document.getElementById("guideContent");
 
   box.innerHTML = `
-    <div class="guide-block">
+    <div class="guide-card">
+      <div class="guide-header" data-guide="life">
+        <span class="guide-title">生活プロトコル（v9.2）</span>
+        <span class="guide-toggle">＋</span>
+      </div>
+      <div class="guide-body" id="guide-life">
+        <p>※ この Process Guide は、祐一の生活リズム・食事傾向・例外処理・サプリ運用を統合した最新版。</p>
 
-      <p>※ この Process Guide は、祐一の生活リズム・食事傾向・例外処理・サプリ運用・アプリの使い方を統合した完全版。</p>
+        <h4>■ 朝の運用</h4>
+        <ul>
+          <li>朝食は「軽め or しっかり」を前日の夜で調整</li>
+          <li>朝しっかり食べた日は昼を軽くする</li>
+          <li>朝軽い日は昼をしっかり食べる</li>
+          <li>朝のカフェインは 9:00 以降が理想</li>
+        </ul>
 
-      <!-- ========================= -->
-      <!-- v9.2：生活プロトコル -->
-      <!-- ========================= -->
+        <h4>■ 昼の運用</h4>
+        <ul>
+          <li>昼が遅い日は夜を軽くする</li>
+          <li>昼に糖質が多い日は夜を控えめに</li>
+        </ul>
 
-      <h2>■ 生活プロトコル（v9.2）</h2>
+        <h4>■ 夜の運用</h4>
+        <ul>
+          <li>夜しっかり食べた日は翌朝軽くする</li>
+          <li>夜遅食は翌朝の糖質を控えめに</li>
+          <li>ジャンク後は「水多め＋朝軽め＋昼しっかり」</li>
+        </ul>
 
-      <h3>● 朝の運用</h3>
-      <ul>
-        <li>朝食は「軽め or しっかり」を前日の夜で調整</li>
-        <li>朝しっかり食べた日は昼を軽くする</li>
-        <li>朝軽い日は昼をしっかり食べる</li>
-        <li>朝のカフェインは 9:00 以降が理想</li>
-      </ul>
+        <h4>■ サプリ運用</h4>
+        <ul>
+          <li>マルチビタミン：朝 or 昼</li>
+          <li>ビタミンD3：朝</li>
+          <li>オメガ3：夜 or 食後</li>
+          <li>亜鉛：夜</li>
+          <li>マグネシウム：寝る前</li>
+          <li>サイリウム：食前</li>
+        </ul>
 
-      <h3>● 昼の運用</h3>
-      <ul>
-        <li>昼が遅い日は夜を軽くする</li>
-        <li>昼に糖質が多い日は夜を控えめに</li>
-      </ul>
+        <h4>■ 例外処理</h4>
+        <ul>
+          <li>外食 → 翌朝軽め</li>
+          <li>酒 → 水多め＋マグネシウム</li>
+          <li>ジャンク → 翌朝軽め＋昼しっかり</li>
+        </ul>
 
-      <h3>● 夜の運用</h3>
-      <ul>
-        <li>夜しっかり食べた日は翌朝軽くする</li>
-        <li>夜遅食は翌朝の糖質を控えめに</li>
-        <li>ジャンク後は「水多め＋朝軽め＋昼しっかり」</li>
-      </ul>
+        <h4>■ 水分管理</h4>
+        <ul>
+          <li>1日 1〜2L を目安に</li>
+          <li>チマチマ飲むので 50ml 刻みで記録</li>
+        </ul>
 
-      <h3>● サプリ運用</h3>
-      <ul>
-        <li>マルチビタミン：朝 or 昼</li>
-        <li>ビタミンD3：朝</li>
-        <li>オメガ3：夜 or 食後</li>
-        <li>亜鉛：夜</li>
-        <li>マグネシウム：寝る前</li>
-        <li>サイリウム：食前</li>
-      </ul>
+        <h4>■ 運動</h4>
+        <ul>
+          <li>HIIT：週 2〜3 回</li>
+          <li>散歩：毎日 20〜30 分</li>
+        </ul>
 
-      <h3>● 例外処理</h3>
-      <ul>
-        <li>外食 → 翌朝軽め</li>
-        <li>酒 → 水多め＋マグネシウム</li>
-        <li>ジャンク → 翌朝軽め＋昼しっかり</li>
-      </ul>
+        <h4>■ 体調管理</h4>
+        <ul>
+          <li>眠気 → カフェイン控えめ</li>
+          <li>胃もたれ → 朝軽め</li>
+          <li>ストレス → 糖質を控えめに</li>
+        </ul>
+      </div>
+    </div>
 
-      <h3>● 水分管理</h3>
-      <ul>
-        <li>1日 1〜2L を目安に</li>
-        <li>チマチマ飲むので 50ml 刻みで記録</li>
-      </ul>
+    <div class="guide-card">
+      <div class="guide-header" data-guide="app">
+        <span class="guide-title">アプリの使い方</span>
+        <span class="guide-toggle">＋</span>
+      </div>
+      <div class="guide-body" id="guide-app">
+        <h4>■ 食べ物入力</h4>
+        <ul>
+          <li>食べ物名を入力 → 量（任意） → 追加</li>
+          <li>まとめ入力は「、」区切りで複数登録可能</li>
+          <li>例：卵2個、納豆、味噌汁</li>
+        </ul>
 
-      <h3>● 運動</h3>
-      <ul>
-        <li>HIIT：週 2〜3 回</li>
-        <li>散歩：毎日 20〜30 分</li>
-      </ul>
+        <h4>■ 飲料入力</h4>
+        <ul>
+          <li>水・コーヒー・お茶などを記録</li>
+          <li>量は ml / L に対応</li>
+          <li>まとめ入力も可能（例：水500ml、コーラ350ml）</li>
+        </ul>
 
-      <h3>● 体調管理</h3>
-      <ul>
-        <li>眠気 → カフェイン控えめ</li>
-        <li>胃もたれ → 朝軽め</li>
-        <li>ストレス → 糖質を控えめに</li>
-      </ul>
+        <h4>■ その他（サプリ・体調・運動）</h4>
+        <ul>
+          <li>例：D3 2000IU、徒歩20分、頭痛</li>
+          <li>量が含まれていれば自動で抽出</li>
+        </ul>
 
+        <h4>■ 履歴候補</h4>
+        <ul>
+          <li>過去に入力した内容が候補として表示</li>
+          <li>タップで即入力</li>
+        </ul>
 
-      <!-- ========================= -->
-      <!-- アプリの使い方ガイド -->
-      <!-- ========================= -->
+        <h4>■ Dashboard / Report</h4>
+        <ul>
+          <li>Dashboard：今日の水分・コーヒー・夜食の有無</li>
+          <li>Report：週間・月間・年間の集計</li>
+        </ul>
+      </div>
+    </div>
 
-      <h2>■ アプリの使い方ガイド</h2>
+    <div class="guide-card">
+      <div class="guide-header" data-guide="supplement">
+        <span class="guide-title">サプリのメリット・デメリット</span>
+        <span class="guide-toggle">＋</span>
+      </div>
+      <div class="guide-body" id="guide-supplement">
+        <h4>■ マルチビタミン</h4>
+        <ul>
+          <li>メリット：全体の底上げ、欠乏防止</li>
+          <li>デメリット：空腹時だと胃が荒れやすい</li>
+        </ul>
 
-      <h3>● 食べ物入力</h3>
-      <ul>
-        <li>食べ物名を入力 → 量（任意） → 追加</li>
-        <li>まとめ入力は「、」区切りで複数登録可能</li>
-        <li>例：卵2個、納豆、味噌汁</li>
-      </ul>
+        <h4>■ ビタミンD3</h4>
+        <ul>
+          <li>メリット：免疫・気分・睡眠の質向上</li>
+          <li>デメリット：摂りすぎ注意（上限あり）</li>
+        </ul>
 
-      <h3>● 飲料入力</h3>
-      <ul>
-        <li>水・コーヒー・お茶などを記録</li>
-        <li>量は ml / L に対応</li>
-        <li>まとめ入力も可能（例：水500ml、コーラ350ml）</li>
-      </ul>
+        <h4>■ オメガ3</h4>
+        <ul>
+          <li>メリット：炎症低減・集中力UP</li>
+          <li>デメリット：空腹時だと気持ち悪くなることがある</li>
+        </ul>
 
-      <h3>● その他（サプリ・体調・運動）</h3>
-      <ul>
-        <li>例：D3 2000IU、徒歩20分、頭痛</li>
-        <li>量が含まれていれば自動で抽出</li>
-      </ul>
+        <h4>■ 亜鉛</h4>
+        <ul>
+          <li>メリット：回復力UP・肌・免疫</li>
+          <li>デメリット：空腹時は吐き気が出やすい</li>
+        </ul>
 
-      <h3>● 履歴候補</h3>
-      <ul>
-        <li>過去に入力した内容が候補として表示</li>
-        <li>タップで即入力</li>
-      </ul>
+        <h4>■ マグネシウム</h4>
+        <ul>
+          <li>メリット：睡眠の質UP・筋肉の緊張緩和</li>
+          <li>デメリット：摂りすぎるとお腹がゆるくなる</li>
+        </ul>
 
-      <h3>● Dashboard</h3>
-      <ul>
-        <li>今日の水分量</li>
-        <li>コーヒー杯数</li>
-        <li>深夜食の有無</li>
-      </ul>
-
-      <h3>● Report</h3>
-      <ul>
-        <li>週間・月間・年間の集計</li>
-        <li>食べた回数・合計量を自動集計</li>
-      </ul>
-
-
-      <!-- ========================= -->
-      <!-- サプリのメリット・デメリット -->
-      <!-- ========================= -->
-
-      <h2>■ サプリのメリット・デメリット（v10.0）</h2>
-
-      <h3>● マルチビタミン</h3>
-      <ul>
-        <li>メリット：全体の底上げ、欠乏防止</li>
-        <li>デメリット：空腹時だと胃が荒れやすい</li>
-      </ul>
-
-      <h3>● ビタミンD3</h3>
-      <ul>
-        <li>メリット：免疫・気分・睡眠の質向上</li>
-        <li>デメリット：摂りすぎ注意（上限あり）</li>
-      </ul>
-
-      <h3>● オメガ3</h3>
-      <ul>
-        <li>メリット：炎症低減・集中力UP</li>
-        <li>デメリット：空腹時だと気持ち悪くなることがある</li>
-      </ul>
-
-      <h3>● 亜鉛</h3>
-      <ul>
-        <li>メリット：回復力UP・肌・免疫</li>
-        <li>デメリット：空腹時は吐き気が出やすい</li>
-      </ul>
-
-      <h3>● マグネシウム</h3>
-      <ul>
-        <li>メリット：睡眠の質UP・筋肉の緊張緩和</li>
-        <li>デメリット：摂りすぎるとお腹がゆるくなる</li>
-      </ul>
-
-      <h3>● サイリウム</h3>
-      <ul>
-        <li>メリット：食欲コントロール・血糖安定</li>
-        <li>デメリット：水と一緒に飲まないと詰まりやすい</li>
-      </ul>
-
+        <h4>■ サイリウム</h4>
+        <ul>
+          <li>メリット：食欲コントロール・血糖安定</li>
+          <li>デメリット：水と一緒に飲まないと詰まりやすい</li>
+        </ul>
+      </div>
     </div>
   `;
+
+  document.querySelectorAll(".guide-header").forEach(header => {
+    header.addEventListener("click", () => {
+      const key = header.dataset.guide;
+      const body = document.getElementById(`guide-${key}`);
+      const icon = header.querySelector(".guide-toggle");
+      const isOpen = body.classList.contains("open");
+      body.classList.toggle("open", !isOpen);
+      icon.textContent = isOpen ? "＋" : "－";
+    });
+  });
 }
+
 
 
 
