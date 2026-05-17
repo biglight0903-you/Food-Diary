@@ -199,10 +199,12 @@ document.getElementById("addFoodLogBtn").addEventListener("click", () => {
 document.querySelectorAll(".log-btn").forEach(btn => {
   btn.addEventListener("click", () => {
 
-    const group = btn.parentElement;
+    // 同グループだけactive解除
+    const parent = btn.parentElement;
 
-    group.querySelectorAll(".log-btn")
-      .forEach(b => b.classList.remove("active"));
+    parent.querySelectorAll(".log-btn").forEach(b => {
+      b.classList.remove("active");
+    });
 
     btn.classList.add("active");
 
@@ -328,10 +330,12 @@ document.getElementById("addDrinkLogBtn").addEventListener("click", () => {
 document.querySelectorAll(".log-btn").forEach(btn => {
   btn.addEventListener("click", () => {
 
-    const group = btn.parentElement;
+    // 同グループだけactive解除
+    const parent = btn.parentElement;
 
-    group.querySelectorAll(".log-btn")
-      .forEach(b => b.classList.remove("active"));
+    parent.querySelectorAll(".log-btn").forEach(b => {
+      b.classList.remove("active");
+    });
 
     btn.classList.add("active");
 
