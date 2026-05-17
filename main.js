@@ -1,880 +1,663 @@
 /* =========================
-   タブ切り替え
+   v11.0 Main JS
+   Part1: 基本構造 / タブ切り替え / 保存基盤
 ========================= */
-document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
 
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.tab).classList.add("active");
-  });
-});
+let logs = JSON.parse(localStorage.getItem("logs") || "[]");
+let settings = JSON.parse(localStorage.getItem("settings") || "{}");
 
-/* =========================
-   ログ保存ユーティリティ
-========================= */
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
-}
-
-function loadLogs() {
-  return JSON.parse(localStorage.getItem("logs") || "{}");
-}
-
-function saveLogs(logs) {
+function saveLogs() {
   localStorage.setItem("logs", JSON.stringify(logs));
 }
 
-/* =========================
-   設定保存
-========================= */
-function loadSettings() {
-  return JSON.parse(
-    localStorage.getItem("settings") ||
-      JSON.stringify({
-        notify18: false,
-        targetWater: 1500
-      })
-  );
-}
-
-function saveSettings(settings) {
+function saveSettings() {
   localStorage.setItem("settings", JSON.stringify(settings));
 }
 
 /* =========================
-   初期ダミーデータ
+   タブ切り替え
 ========================= */
-(function seedIfEmpty() {
-  const logs = loadLogs();
-  const today = getTodayKey();
-  if (!logs[today]) {
-    logs[today] = [
-      { time: "08:10", text: "飲料 水 200ml" },
-      { time: "09:30", text: "食事 オートミール" },
-      { time: "10:00", text: "飲料 コーヒー" },
-      { time: "12:40", text: "食事 パスタ" },
-      { time: "18:00", text: "サプリ マグネシウム" },
-      { time: "19:10", text: "徒歩 2.0km" },
-      { time: "21:30", text: "体調 少し眠い" }
-    ];
-    saveLogs(logs);
-  }
-})();
+document.querySelectorAll(".tab-button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-/* =========================
-   ログ追加・削除
-========================= */
-function addLog(text) {
-  const logs = loadLogs();
-  const today = getTodayKey();
-  if (!logs[today]) logs[today] = [];
-  const now = new Date();
-  const time = now.toTimeString().slice(0, 5);
-  logs[today].push({ time, text });
-  saveLogs(logs);
-  renderLogList();
-  renderDashboard();
-  renderReports();
-}
-
-function deleteLog(index) {
-  const logs = loadLogs();
-  const today = getTodayKey();
-  if (!logs[today]) return;
-  logs[today].splice(index, 1);
-  saveLogs(logs);
-  renderLogList();
-  renderDashboard();
-  renderReports();
-}
-
-/* =========================
-   入力UI（カテゴリ＋行動ログ）
-========================= */
-let activityState = {
-  watching: false,
-  watchId: null,
-  lastPos: null,
-  distanceKm: 0
-};
-
-function renderLogInput() {
-  const area = document.getElementById("logInputArea");
-  area.innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">入力</div>
-      <div id="categoryButtons">
-        <button class="catbtn" data-cat="飲料">飲料</button>
-        <button class="catbtn" data-cat="薬">薬</button>
-        <button class="catbtn" data-cat="食事">食事</button>
-        <button class="catbtn" data-cat="サプリ">サプリ</button>
-        <button class="catbtn" data-cat="菓子">菓子</button>
-        <button class="catbtn" data-cat="運動">運動</button>
-        <button class="catbtn" data-cat="体調">体調</button>
-        <button class="catbtn" data-cat="例外">例外</button>
-        <button class="catbtn" data-cat="徒歩">徒歩</button>
-        <button class="catbtn" data-cat="ラン">ラン</button>
-      </div>
-
-      <textarea id="logText" placeholder="自由入力"></textarea>
-      <button id="addLogBtn" class="primary-btn">＋ 追加</button>
-
-      <div class="activity-block">
-        <div class="activity-label">行動ログ（GPS距離計測）</div>
-        <div class="activity-row">
-          <button id="activityStartBtn" class="primary-btn">距離計測開始</button>
-          <button id="activityStopBtn" class="primary-btn" disabled>停止してログに追加</button>
-        </div>
-        <div class="activity-row">
-          <span>距離：<span id="activityDistance">0.00</span> km</span>
-          <span>推定歩数：<span id="activitySteps">0</span> 歩</span>
-        </div>
-      </div>
-    </div>
-  `;
-
-  /* カテゴリーボタン */
-  document.querySelectorAll(".catbtn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const cat = btn.dataset.cat;
-      const text = document.getElementById("logText").value.trim();
-      addLog(text ? `${cat} ${text}` : cat);
-      document.getElementById("logText").value = "";
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".tab-content").forEach(sec => {
+      sec.classList.remove("active");
+      if (sec.id === "tab-" + tab) sec.classList.add("active");
     });
-  });
 
-  /* テキスト追加 */
-  document.getElementById("addLogBtn").addEventListener("click", () => {
-    const text = document.getElementById("logText").value.trim();
-    if (text) addLog(text);
-    document.getElementById("logText").value = "";
+    if (tab === "dashboard") renderDashboard();
+    if (tab === "report") renderReport();
+    if (tab === "guide") renderGuide();
   });
+});
 
-  /* 行動ログ（GPS） */
-  document.getElementById("activityStartBtn").addEventListener("click", startActivityTracking);
-  document.getElementById("activityStopBtn").addEventListener("click", stopActivityTracking);
+/* =========================
+   日付ユーティリティ
+========================= */
+function todayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
+function formatDate(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function getPast7Range() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - 6);
+  return {
+    start: formatDate(start),
+    end: formatDate(end)
+  };
 }
 
 /* =========================
-   ログ一覧
+   ログ追加（共通）
+========================= */
+function addLog(category, name, amount, unit) {
+  logs.push({
+    time: new Date().toISOString(),
+    category,
+    name,
+    amount: amount || null,
+    unit: unit || null
+  });
+  saveLogs();
+  renderLogList();
+}
+
+/* =========================
+   ログ一覧表示
 ========================= */
 function renderLogList() {
-  const list = document.getElementById("logList");
-  const logs = loadLogs()[getTodayKey()] || [];
-  list.innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">今日のログ</div>
-      ${
-        logs.length
-          ? logs
-              .map(
-                (l, i) => `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span>・${l.time} ${l.text}</span>
-            <button class="delete-btn" onclick="deleteLog(${i})">×</button>
-          </div>`
-              )
-              .join("")
-          : "まだ入力がありません"
-      }
-    </div>
-  `;
+  const box = document.getElementById("logList");
+  box.innerHTML = "";
+
+  logs.slice().reverse().forEach((log, idx) => {
+    const div = document.createElement("div");
+    div.className = "log-item";
+
+    const text = `${log.category || ""} ${log.name || ""} ${log.amount ? log.amount : ""}${log.unit ? log.unit : ""}`;
+
+    div.innerHTML = `
+      <span>${text}</span>
+      <button class="delete-log-btn" data-index="${logs.length - 1 - idx}">削除</button>
+    `;
+
+    box.appendChild(div);
+  });
+
+  document.querySelectorAll(".delete-log-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.dataset.index);
+      logs.splice(i, 1);
+      saveLogs();
+      renderLogList();
+    });
+  });
 }
+
+renderLogList();
+
 
 /* =========================
-   GPS距離計測
+   Part2: 食べ物ログ処理
 ========================= */
-function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+
+/* -------------------------
+   単語候補（食べ物）
+------------------------- */
+function getFoodHistory() {
+  const names = logs
+    .filter(l => l.category && (
+      l.category.includes("食") ||
+      l.category === "例外" ||
+      l.category === "外食" ||
+      l.category === "食べすぎ" ||
+      l.category === "夜食"
+    ))
+    .map(l => l.name)
+    .filter(n => n && n.trim() !== "");
+
+  return Array.from(new Set(names));
 }
 
-function updateActivityDisplay() {
-  const km = activityState.distanceKm;
-  const steps = Math.round(km * 1300);
-  document.getElementById("activityDistance").textContent = km.toFixed(2);
-  document.getElementById("activitySteps").textContent = steps;
-}
-
-function startActivityTracking() {
-  if (!navigator.geolocation) {
-    alert("位置情報が使えません");
+function showFoodSuggestions(text) {
+  const box = document.getElementById("foodNameSuggestions");
+  if (!text) {
+    box.style.display = "none";
     return;
   }
-  if (activityState.watching) return;
 
-  activityState.watching = true;
-  activityState.distanceKm = 0;
-  activityState.lastPos = null;
-
-  document.getElementById("activityStartBtn").disabled = true;
-  document.getElementById("activityStopBtn").disabled = false;
-
-  activityState.watchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const { latitude, longitude } = pos.coords;
-      if (activityState.lastPos) {
-        const d = haversineDistance(
-          activityState.lastPos.lat,
-          activityState.lastPos.lon,
-          latitude,
-          longitude
-        );
-        activityState.distanceKm += d;
-      }
-      activityState.lastPos = { lat: latitude, lon: longitude };
-      updateActivityDisplay();
-    },
-    () => alert("位置情報の取得に失敗しました"),
-    { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
-  );
-}
-
-function stopActivityTracking() {
-  if (!activityState.watching) return;
-
-  activityState.watching = false;
-  document.getElementById("activityStartBtn").disabled = false;
-  document.getElementById("activityStopBtn").disabled = true;
-
-  if (activityState.watchId != null) {
-    navigator.geolocation.clearWatch(activityState.watchId);
-    activityState.watchId = null;
+  const list = getFoodHistory().filter(n => n.includes(text));
+  if (list.length === 0) {
+    box.style.display = "none";
+    return;
   }
 
-  const km = activityState.distanceKm;
-  if (km > 0.05) {
-    const steps = Math.round(km * 1300);
-    addLog(`徒歩 ${km.toFixed(2)}km（推定 ${steps}歩）`);
-  }
+  box.innerHTML = "";
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = item;
+    div.addEventListener("click", () => {
+      document.getElementById("foodName").value = item;
+      box.style.display = "none";
+    });
+    box.appendChild(div);
+  });
 
-  activityState.distanceKm = 0;
-  activityState.lastPos = null;
-  updateActivityDisplay();
+  box.style.display = "block";
 }
 
-/* =========================
-   今日の解析（AIっぽいロジック）
-========================= */
-function analyzeToday() {
-  const logs = loadLogs()[getTodayKey()] || [];
-  let water = 0;
-  let coffee = 0;
-  let protein = 0;
-  let lateMeal = false;
-  let walkKm = 0;
+document.getElementById("foodName").addEventListener("input", e => {
+  showFoodSuggestions(e.target.value);
+});
 
-  logs.forEach((l) => {
-    const t = l.text;
-    if (t.includes("水")) water += 200;
-    if (t.includes("コーヒー")) coffee += 1;
-    if (t.includes("プロテイン")) protein += 1;
-    if (t.includes("食事") && l.time >= "22:00") lateMeal = true;
+/* -------------------------
+   単品 食べ物ログ追加
+------------------------- */
+let selectedFoodUnit = null;
 
-    if (t.includes("徒歩")) {
-      const m = t.match(/([\d.]+)km/);
-      if (m) walkKm += parseFloat(m[1]);
+document.querySelectorAll(".unit-btn[data-target='foodUnit']").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".unit-btn[data-target='foodUnit']").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedFoodUnit = btn.dataset.unit;
+  });
+});
+
+document.getElementById("addFoodLogBtn").addEventListener("click", () => {
+  const name = document.getElementById("foodName").value.trim();
+  const amount = document.getElementById("foodAmount").value.trim();
+  const bulk = document.getElementById("foodBulk").value.trim();
+
+  const category = window.selectedCategory || "食事";
+
+  // まとめ入力がある場合はそちらを優先
+  if (bulk) {
+    addFoodBulk(category, bulk);
+    document.getElementById("foodBulk").value = "";
+    return;
+  }
+
+  if (!name) return;
+
+  addLog(category, name, amount || null, selectedFoodUnit || null);
+
+  document.getElementById("foodName").value = "";
+  document.getElementById("foodAmount").value = "";
+});
+
+/* -------------------------
+   カテゴリーボタン（食べ物）
+------------------------- */
+document.querySelectorAll(".log-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    window.selectedCategory = btn.dataset.category;
+  });
+});
+
+/* -------------------------
+   まとめ入力（食べ物）
+   例：卵2個、納豆、味噌汁
+------------------------- */
+function addFoodBulk(category, text) {
+  const items = text.split(/、|,/).map(t => t.trim()).filter(t => t);
+
+  items.forEach(item => {
+    // 量抽出（例：卵2個 → name=卵, amount=2, unit=個）
+    const match = item.match(/^(.+?)(\d+)([a-zA-Zぁ-んァ-ン一-龥]+)$/);
+
+    if (match) {
+      const name = match[1].trim();
+      const amount = Number(match[2]);
+      const unit = match[3].trim();
+      addLog(category, name, amount, unit);
+    } else {
+      addLog(category, item, null, null);
     }
   });
-
-  return { water, coffee, protein, lateMeal, walkKm };
 }
 
+
 /* =========================
-   Dashboard 表示
+   Part3: 飲料ログ処理
 ========================= */
-function renderDashboard() {
-  const todayEl = document.getElementById("dashboardToday");
-  const trendEl = document.getElementById("dashboardTrends");
-  const { water, coffee, protein, lateMeal, walkKm } = analyzeToday();
-  const settings = loadSettings();
-  const targetWater = settings.targetWater || 1500;
 
-  const improvements = [];
-  if (water < targetWater) improvements.push(`水分が少なめです（目安 ${targetWater}ml）`);
-  if (coffee > 3) improvements.push("カフェインが多めです（3杯まで推奨）");
-  if (protein < 2) improvements.push("タンパク質が少なめです（1日2回が目安）");
-  if (lateMeal) improvements.push("22時以降の食事があります（翌日の眠気リスク）");
-  if (walkKm < 3) improvements.push("徒歩距離が少なめです（3km以上が目安）");
+/* -------------------------
+   単語候補（飲料）
+------------------------- */
+function getDrinkHistory() {
+  const names = logs
+    .filter(l => l.category && (
+      l.category === "飲料" ||
+      l.category === "水" ||
+      l.category === "コーヒー" ||
+      l.category === "お茶" ||
+      l.category === "炭酸水" ||
+      l.category === "酒"
+    ))
+    .map(l => l.name)
+    .filter(n => n && n.trim() !== "");
 
-  let headacheRisk = "低";
-  let sleepiness = "普通";
-  let focus = "安定";
+  return Array.from(new Set(names));
+}
 
-  if (water < targetWater * 0.7) headacheRisk = "中";
-  if (lateMeal || coffee > 3) {
-    sleepiness = "高";
-    focus = "やや低下";
+function showDrinkSuggestions(text) {
+  const box = document.getElementById("drinkNameSuggestions");
+  if (!text) {
+    box.style.display = "none";
+    return;
   }
 
-  todayEl.innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">今日のサマリー</div>
-      <div>水分：${water} ml（目標 ${targetWater} ml）</div>
-      <div>コーヒー：${coffee} 杯</div>
-      <div>プロテイン：${protein} 回</div>
-      <div>徒歩距離：${walkKm.toFixed(2)} km</div>
-      <div>深夜食：${lateMeal ? "あり" : "なし"}</div>
+  const list = getDrinkHistory().filter(n => n.includes(text));
+  if (list.length === 0) {
+    box.style.display = "none";
+    return;
+  }
 
-      <div style="margin-top:8px; font-weight:600;">改善ポイント</div>
-      <ul>
-        ${
-          improvements.length
-            ? improvements.map((i) => `<li>${i}</li>`).join("")
-            : "<li>特に大きな問題はありません</li>"
-        }
-      </ul>
-
-      <div style="margin-top:8px; font-weight:600;">明日の予測</div>
-      <ul>
-        <li>頭痛リスク：${headacheRisk}</li>
-        <li>眠気：${sleepiness}</li>
-        <li>集中力：${focus}</li>
-      </ul>
-    </div>
-  `;
-
-  const trends = analyzeTrends();
-
-  trendEl.innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">簡易トレンド（過去7日）</div>
-      <div>平均水分：${trends.avgWater.toFixed(0)} ml</div>
-      <div>平均コーヒー：${trends.avgCoffee.toFixed(1)} 杯</div>
-      <div>平均徒歩距離：${trends.avgWalkKm.toFixed(2)} km</div>
-      <div>深夜食の頻度：${trends.lateMealCount} 日 / ${trends.days} 日</div>
-    </div>
-  `;
-}
-
-/* =========================
-   トレンド解析（過去7日）
-========================= */
-function analyzeTrends() {
-  const logs = loadLogs();
-  const dates = Object.keys(logs).sort();
-  const last7 = dates.slice(-7);
-
-  let totalWater = 0;
-  let totalCoffee = 0;
-  let totalWalkKm = 0;
-  let lateMealCount = 0;
-
-  last7.forEach((d) => {
-    const dayLogs = logs[d] || [];
-    let water = 0;
-    let coffee = 0;
-    let walkKm = 0;
-    let late = false;
-
-    dayLogs.forEach((l) => {
-      const t = l.text;
-      if (t.includes("水")) water += 200;
-      if (t.includes("コーヒー")) coffee += 1;
-
-      if (t.includes("徒歩")) {
-        const m = t.match(/([\d.]+)km/);
-        if (m) walkKm += parseFloat(m[1]);
-      }
-
-      if (t.includes("食事") && l.time >= "22:00") late = true;
+  box.innerHTML = "";
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = item;
+    div.addEventListener("click", () => {
+      document.getElementById("drinkName").value = item;
+      box.style.display = "none";
     });
-
-    totalWater += water;
-    totalCoffee += coffee;
-    totalWalkKm += walkKm;
-    if (late) lateMealCount += 1;
+    box.appendChild(div);
   });
 
-  const days = last7.length || 1;
+  box.style.display = "block";
+}
 
-  return {
-    days,
-    avgWater: totalWater / days,
-    avgCoffee: totalCoffee / days,
-    avgWalkKm: totalWalkKm / days,
-    lateMealCount
-  };
+document.getElementById("drinkName").addEventListener("input", e => {
+  showDrinkSuggestions(e.target.value);
+});
+
+/* -------------------------
+   単品 飲料ログ追加
+------------------------- */
+let selectedDrinkUnit = null;
+
+document.querySelectorAll(".unit-btn[data-target='drinkUnit']").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".unit-btn[data-target='drinkUnit']").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedDrinkUnit = btn.dataset.unit;
+  });
+});
+
+document.getElementById("addDrinkLogBtn").addEventListener("click", () => {
+  const name = document.getElementById("drinkName").value.trim();
+  const amount = document.getElementById("drinkAmount").value.trim();
+  const bulk = document.getElementById("drinkBulk").value.trim();
+
+  const category = window.selectedCategory || "飲料";
+
+  // まとめ入力がある場合はそちらを優先
+  if (bulk) {
+    addDrinkBulk(category, bulk);
+    document.getElementById("drinkBulk").value = "";
+    return;
+  }
+
+  if (!name) return;
+
+  addLog(category, name, amount || null, selectedDrinkUnit || null);
+
+  document.getElementById("drinkName").value = "";
+  document.getElementById("drinkAmount").value = "";
+});
+
+/* -------------------------
+   カテゴリーボタン（飲料）
+------------------------- */
+document.querySelectorAll(".log-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    window.selectedCategory = btn.dataset.category;
+  });
+});
+
+/* -------------------------
+   まとめ入力（飲料）
+   例：水500ml、コーラゼロ350ml
+------------------------- */
+function addDrinkBulk(category, text) {
+  const items = text.split(/、|,/).map(t => t.trim()).filter(t => t);
+
+  items.forEach(item => {
+    // 量抽出（例：水500ml → name=水, amount=500, unit=ml）
+    const match = item.match(/^(.+?)(\d+)(ml|ML|l|L|cc|CC)$/);
+
+    if (match) {
+      const name = match[1].trim();
+      const amount = Number(match[2]);
+      const unit = match[3].toLowerCase() === "l" ? "L" : match[3].toLowerCase();
+      addLog(category, name, amount, unit);
+    } else {
+      addLog(category, item, null, null);
+    }
+  });
 }
 
 /* =========================
-   期間別集計（週・月・年）
+   Part4: サプリ / 体調 / 運動 / 自由入力
 ========================= */
-function getPeriodStats(period) {
-  const logs = loadLogs();
-  const now = new Date();
-  let startDate;
 
-  if (period === "week") {
-    const day = now.getDay() || 7;
-    startDate = new Date(now);
-    startDate.setDate(now.getDate() - (day - 1));
-  } else if (period === "month") {
-    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+/* -------------------------
+   単語候補（その他）
+------------------------- */
+function getMiscHistory() {
+  const names = logs
+    .filter(l =>
+      l.category &&
+      !(
+        l.category.includes("食") ||
+        l.category === "飲料" ||
+        l.category === "水" ||
+        l.category === "コーヒー" ||
+        l.category === "お茶" ||
+        l.category === "炭酸水" ||
+        l.category === "酒"
+      )
+    )
+    .map(l => l.name)
+    .filter(n => n && n.trim() !== "");
+
+  return Array.from(new Set(names));
+}
+
+function showMiscSuggestions(text) {
+  const box = document.getElementById("miscTextSuggestions");
+  if (!text) {
+    box.style.display = "none";
+    return;
+  }
+
+  const list = getMiscHistory().filter(n => n.includes(text));
+  if (list.length === 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  box.innerHTML = "";
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.textContent = item;
+    div.addEventListener("click", () => {
+      document.getElementById("miscText").value = item;
+      box.style.display = "none";
+    });
+    box.appendChild(div);
+  });
+
+  box.style.display = "block";
+}
+
+document.getElementById("miscText").addEventListener("input", e => {
+  showMiscSuggestions(e.target.value);
+});
+
+/* -------------------------
+   その他ログ追加
+------------------------- */
+document.getElementById("addMiscLogBtn").addEventListener("click", () => {
+  const text = document.getElementById("miscText").value.trim();
+  if (!text) return;
+
+  const category = window.selectedCategory || "その他";
+
+  // 量抽出（例：徒歩20分 → name=徒歩, amount=20, unit=分）
+  const match = text.match(/^(.+?)(\d+)([a-zA-Zぁ-んァ-ン一-龥]+)$/);
+
+  if (match) {
+    const name = match[1].trim();
+    const amount = Number(match[2]);
+    const unit = match[3].trim();
+    addLog(category, name, amount, unit);
   } else {
-    startDate = new Date(now.getFullYear(), 0, 1);
+    addLog(category, text, null, null);
   }
 
-  let water = 0;
-  let coffee = 0;
-  let protein = 0;
-  let walkKm = 0;
-  let lateMealDays = 0;
-  let daysCount = 0;
+  document.getElementById("miscText").value = "";
+});
 
-  Object.keys(logs).forEach((dateStr) => {
-    const d = new Date(dateStr + "T00:00:00");
-    if (d < startDate || d > now) return;
 
-    daysCount += 1;
-    const dayLogs = logs[dateStr];
-    let dayLate = false;
-
-    dayLogs.forEach((l) => {
-      const t = l.text;
-
-      if (t.includes("水")) water += 200;
-      if (t.includes("コーヒー")) coffee += 1;
-      if (t.includes("プロテイン")) protein += 1;
-
-      if (t.includes("徒歩")) {
-        const m = t.match(/([\d.]+)km/);
-        if (m) walkKm += parseFloat(m[1]);
-      }
-
-      if (t.includes("食事") && l.time >= "22:00") dayLate = true;
-    });
-
-    if (dayLate) lateMealDays += 1;
-  });
-
-  daysCount = daysCount || 1;
-
-  return {
-    days: daysCount,
-    avgWater: water / daysCount,
-    avgCoffee: coffee / daysCount,
-    avgProtein: protein / daysCount,
-    avgWalkKm: walkKm / daysCount,
-    lateMealDays
-  };
-}
 
 /* =========================
-   レポート描画
+   Part5: Dashboard / Report / Guide
 ========================= */
-function renderReports() {
-  const week = getPeriodStats("week");
-  const month = getPeriodStats("month");
-  const year = getPeriodStats("year");
 
-  document.getElementById("weeklyReport").innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">週間レポート</div>
-      <div>対象日数：${week.days} 日</div>
-      <div>平均水分：${week.avgWater.toFixed(0)} ml</div>
-      <div>平均コーヒー：${week.avgCoffee.toFixed(1)} 杯</div>
-      <div>平均プロテイン：${week.avgProtein.toFixed(1)} 回</div>
-      <div>平均徒歩距離：${week.avgWalkKm.toFixed(2)} km</div>
-      <div>深夜食のあった日：${week.lateMealDays} 日</div>
-    </div>
-  `;
+/* -------------------------
+   Dashboard
+------------------------- */
+function renderDashboard() {
+  const info = document.getElementById("dashboardDateInfo");
+  const content = document.getElementById("dashboardContent");
 
-  document.getElementById("monthlyReport").innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">月間レポート</div>
-      <div>対象日数：${month.days} 日</div>
-      <div>平均水分：${month.avgWater.toFixed(0)} ml</div>
-      <div>平均コーヒー：${month.avgCoffee.toFixed(1)} 杯</div>
-      <div>平均プロテイン：${month.avgProtein.toFixed(1)} 回</div>
-      <div>平均徒歩距離：${month.avgWalkKm.toFixed(2)} km</div>
-      <div>深夜食のあった日：${month.lateMealDays} 日</div>
-    </div>
-  `;
+  const today = todayStr();
+  const range = getPast7Range();
 
-  document.getElementById("yearlyReport").innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">年間レポート</div>
-      <div>対象日数：${year.days} 日</div>
-      <div>平均水分：${year.avgWater.toFixed(0)} ml</div>
-      <div>平均コーヒー：${year.avgCoffee.toFixed(1)} 杯</div>
-      <div>平均プロテイン：${year.avgProtein.toFixed(1)} 回</div>
-      <div>平均徒歩距離：${year.avgWalkKm.toFixed(2)} km</div>
-      <div>深夜食のあった日：${year.lateMealDays} 日</div>
-    </div>
-  `;
-}
+  info.textContent = `今日（${today}） / 過去7日（${range.start}〜${range.end}）`;
 
-/* =========================
-   Guide（完全統合版 v10.0）
-========================= */
-function renderGuide() {
-  const g = document.getElementById("guideContent");
+  const todayLogs = logs.filter(l => l.time.slice(0, 10) === today);
 
-  g.innerHTML = `
-    <div class="dash-block">
-      <div class="dash-title">Guide（完全統合版 v10.0）</div>
+  let waterTotal = 0;
+  let coffeeCount = 0;
+  let lateSnack = false;
 
-      <h2>1. コア思想（SYSTEM PHILOSOPHY）</h2>
-      <div class="box box-info">
-        <div>・迷ったらプロテインを選択する。</div>
-        <div>・夜は糖質を入れず、睡眠中の脂肪燃焼を妨げない。</div>
-        <div>・炎症を抑えることで、減量スピードと体調を両立させる。</div>
-        <div>・睡眠の質が、翌日の食欲・代謝・意思決定を左右する。</div>
-        <div>・例外処理（外食・酒・食べすぎ）をあらかじめ設計しておく。</div>
-      </div>
-
-      <h2>2. サプリメント運用（タイミング＋メリット/デメリット）</h2>
-
-      <div class="grid-2">
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">朝（朝食後）</span>
-            <span class="tag">代謝スイッチ</span>
-          </div>
-          <ul class="param-list">
-            <li><strong>ビタミンD3</strong>：免疫・メンタル安定／脂溶性なので食後</li>
-            <li><strong>マルチビタミン</strong>：栄養の底上げ／空腹時は胃が荒れる</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">昼（昼食後）</span>
-            <span class="tag">炎症コントロール 前半</span>
-          </div>
-          <ul class="param-list">
-            <li><strong>オメガ3</strong>：炎症抑制・集中力UP／空腹時はムカつく</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">夜（夕食後）</span>
-            <span class="tag">回復 × 炎症コントロール 後半</span>
-          </div>
-          <ul class="param-list">
-            <li><strong>オメガ3</strong>：昼と分割で血中濃度安定</li>
-            <li><strong>亜鉛</strong>：男性ホルモン維持／空腹時は吐き気</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">就寝90分前</span>
-            <span class="tag">睡眠プロトコル</span>
-          </div>
-          <ul class="param-list">
-            <li><strong>マグネシウム</strong>：睡眠の質UP／多いとお腹がゆるい</li>
-          </ul>
-        </div>
-
-      </div>
-
-      <h3>プロテイン（メリット/デメリット）</h3>
-      <ul class="param-list">
-        <li>血糖値が安定し、集中力が落ちにくい</li>
-        <li>空腹感のコントロールに最適</li>
-        <li>飲みすぎると胃が重い</li>
-      </ul>
-
-      <h2>3. 1日の運用スケジュール（バッチ処理）</h2>
-
-      <table>
-        <tr><th>タイミング</th><th>実行内容</th><th>ポイント</th></tr>
-
-        <tr>
-          <td class="time-col">Morning</td>
-          <td>卵2個＋納豆＋味噌汁＋プロテイン半スクープ<br>＋ D3＋マルチ（食後）</td>
-          <td>代謝スイッチ＋血糖値安定</td>
-        </tr>
-
-        <tr>
-          <td class="time-col">Lunch</td>
-          <td>鶏むね肉＋野菜＋白米100〜150g＋オメガ3</td>
-          <td>集中力維持・炎症コントロール</td>
-        </tr>
-
-        <tr>
-          <td class="time-col">Night</td>
-          <td>プロテイン＋サイリウム＋オメガ3＋亜鉛</td>
-          <td>夜は糖質禁止／睡眠の質を最優先</td>
-        </tr>
-
-        <tr>
-          <td class="time-col">Sleep 90min Before</td>
-          <td>スマホOFF・ぬるめのシャワー・Mg</td>
-          <td>翌日の食欲・代謝・メンタルが安定</td>
-        </tr>
-      </table>
-
-      <h2>4. 許可食品リスト（優先度付き）</h2>
-
-      <div class="grid-3">
-
-        <div class="card">
-          <div class="card-title">最優先：タンパク質</div>
-          <p class="desc">卵／納豆／豆腐／鶏むね肉／ヨーグルト</p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">補助：整える食品</div>
-          <p class="desc">味噌汁／野菜／海藻／きのこ／キムチ</p>
-        </div>
-
-        <div class="card">
-          <div class="card-title">制限付き：タイミング限定</div>
-          <p class="desc">白米（昼のみ）／フルーツ（朝のみ）／夜の糖質は禁止</p>
-        </div>
-
-      </div>
-
-      <h2>5. 食事テンプレート</h2>
-
-      <table>
-        <tr><th>タイミング</th><th>メニュー構成</th></tr>
-        <tr><td class="time-col">朝</td><td>卵＋納豆＋味噌汁＋プロテイン</td></tr>
-        <tr><td class="time-col">昼</td><td>鶏むね肉＋野菜＋白米</td></tr>
-        <tr><td class="time-col">夜</td><td>プロテイン＋サイリウム</td></tr>
-        <tr><td class="time-col">間食</td><td>ゆで卵 or ヨーグルト</td></tr>
-      </table>
-
-      <h2>6. 例外処理プロトコル</h2>
-
-      <div class="box box-warning">
-        <strong>食べすぎた場合</strong><br>
-        ・翌日で調整（断食はしない）<br>
-        ・タンパク質と水を優先
-      </div>
-
-      <div class="box box-warning">
-        <strong>外食・酒</strong><br>
-        ・酒は蒸留酒＋水同量<br>
-        ・翌日：納豆2P＋水3L
-      </div>
-
-      <div class="box box-warning">
-        <strong>歩けない日</strong><br>
-        ・階段優先／1駅手前で降りる<br>
-        ・無理なら 1分HIIT
-      </div>
-  `;
-
-g.innerHTML += `
-      <h2>7. 期待される変化（KPI）</h2>
-
-      <table>
-        <tr><th>期間</th><th>変化</th></tr>
-        <tr><td class="time-col">3日</td><td>間食欲求が減る</td></tr>
-        <tr><td class="time-col">1週間</td><td>暴食が減る</td></tr>
-        <tr><td class="time-col">2週間</td><td>体重・体脂肪が減り始める</td></tr>
-        <tr><td class="time-col">1ヶ月</td><td>ルーチンが自動化</td></tr>
-      </table>
-
-      <h2>8. 摂取量パラメータ</h2>
-
-      <div class="grid-2">
-
-        <div class="card">
-          <div class="card-title">プロテイン</div>
-          <ul class="param-list">
-            <li>1回：30g</li>
-            <li>夜置換：1〜2回</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">サイリウム</div>
-          <ul class="param-list">
-            <li>3〜5g</li>
-            <li>水300〜400ml</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">食品パラメータ</div>
-          <ul class="param-list">
-            <li>卵：2〜4個</li>
-            <li>納豆：1P</li>
-            <li>豆腐：150〜300g</li>
-            <li>白米：昼のみ100〜150g</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-title">サプリ規定量</div>
-          <ul class="param-list">
-            <li>D3：5000IU</li>
-            <li>マルチ：1〜2粒</li>
-            <li>オメガ3：1〜2粒 × 2回</li>
-            <li>亜鉛：15〜30mg</li>
-            <li>Mg：200〜400mg</li>
-          </ul>
-        </div>
-
-      </div>
-
-      <h2>9. クリティカルルール</h2>
-
-      <div class="box box-danger">
-        <div>・夜の糖質は禁止</div>
-        <div>・空腹は水 or タンパク質で処理</div>
-        <div>・迷ったらプロテイン</div>
-        <div>・完璧より継続</div>
-      </div>
-
-      <h2>10. 可変プロトコル（A/Bパターン）</h2>
-
-      <div class="grid-2">
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">A：前夜しっかり食べた翌日</span>
-            <span class="tag">朝は軽く</span>
-          </div>
-          <ul class="param-list">
-            <li>プロテイン10〜15g</li>
-            <li>D3＋マルチ</li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">B：前夜が軽かった翌日</span>
-            <span class="tag">朝はしっかり</span>
-          </div>
-          <ul class="param-list">
-            <li>卵2＋納豆＋味噌汁＋プロテイン</li>
-            <li>D3＋マルチ</li>
-          </ul>
-        </div>
-
-      </div>
-
-      <h2>11. 昼〜夜の共通ルール</h2>
-
-      <table>
-        <tr><th>タイミング</th><th>食事</th><th>サプリ</th><th>ポイント</th></tr>
-
-        <tr>
-          <td class="time-col">昼</td>
-          <td>鶏むね肉＋野菜＋白米100g</td>
-          <td>オメガ3</td>
-          <td>遅い昼は軽く</td>
-        </tr>
-
-        <tr>
-          <td class="time-col">夜10時前後</td>
-          <td>ヨーグルト／卵／豆腐／プロテイン</td>
-          <td>オメガ3＋亜鉛</td>
-          <td>糖質禁止</td>
-        </tr>
-
-        <tr>
-          <td class="time-col">就寝90分前</td>
-          <td>スマホOFF・シャワー</td>
-          <td>Mg</td>
-          <td>睡眠の深さを確保</td>
-        </tr>
-
-      </table>
-    </div>
-  `;
-
-  const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム", "プロテイン"];
-  g.innerHTML = g.innerHTML.replace(
-    new RegExp(words.join("|"), "g"),
-    (match) => `<span class="highlight">${match}</span>`
-  );
-}
-
-/* =========================
-   設定（通知・水分目標）
-========================= */
-function renderSettings() {
-  const settings = loadSettings();
-
-  document.getElementById("notify18").checked = settings.notify18;
-  document.getElementById("targetWater").value = settings.targetWater;
-
-  document.getElementById("notify18").addEventListener("change", (e) => {
-    settings.notify18 = e.target.checked;
-    saveSettings(settings);
-  });
-
-  document.getElementById("targetWater").addEventListener("input", (e) => {
-    settings.targetWater = Number(e.target.value);
-    saveSettings(settings);
-    renderDashboard();
-  });
-
-  document.getElementById("backupBtn").addEventListener("click", () => {
-    const data = {
-      logs: loadLogs(),
-      settings: loadSettings()
-    };
-    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "food_diary_backup.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  document.getElementById("restoreBtn").addEventListener("click", () => {
-    const fileInput = document.getElementById("restoreFile");
-    if (!fileInput.files.length) {
-      alert("ファイルを選択してください");
-      return;
+  todayLogs.forEach(l => {
+    if (l.category === "水" || (l.unit === "ml" && l.name.includes("水"))) {
+      waterTotal += Number(l.amount || 0);
     }
-
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (data.logs) localStorage.setItem("logs", JSON.stringify(data.logs));
-        if (data.settings) localStorage.setItem("settings", JSON.stringify(data.settings));
-
-        alert("復元が完了しました");
-        renderAll();
-      } catch {
-        alert("復元に失敗しました（ファイル形式エラー）");
-      }
-    };
-    reader.readAsText(file);
+    if (l.category === "コーヒー" || l.name.includes("コーヒー")) {
+      coffeeCount++;
+    }
+    if (l.category === "夜食") {
+      const hour = new Date(l.time).getHours();
+      if (hour >= 21) lateSnack = true;
+    }
   });
+
+  content.innerHTML = `
+    <div><strong>水分摂取：</strong> ${waterTotal} ml</div>
+    <div><strong>コーヒー：</strong> ${coffeeCount} 杯</div>
+    <div><strong>深夜食：</strong> ${lateSnack ? "あり" : "なし"}</div>
+  `;
 }
 
+/* -------------------------
+   Report
+------------------------- */
+function renderReport() {
+  const info = document.getElementById("reportDateInfo");
+  const content = document.getElementById("reportContent");
+
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = today.getMonth() + 1;
+
+  info.innerHTML = `
+    <div>週間：${getPast7Range().start}〜${getPast7Range().end}</div>
+    <div>月間：${y}年${m}月</div>
+    <div>年間：${y}年</div>
+  `;
+
+  const summary = {};
+
+  logs.forEach(l => {
+    const key = l.name;
+    if (!summary[key]) summary[key] = { count: 0, total: 0, unit: l.unit || "" };
+    summary[key].count++;
+    if (l.amount) summary[key].total += Number(l.amount);
+  });
+
+  let html = "";
+  Object.keys(summary).forEach(k => {
+    const s = summary[k];
+    html += `
+      <div style="margin-bottom:8px;">
+        <strong>${k}</strong>：${s.count} 回  
+        ${s.total ? ` / 合計 ${s.total}${s.unit}` : ""}
+      </div>
+    `;
+  });
+
+  content.innerHTML = html;
+}
+
+/* -------------------------
+   Guide
+------------------------- */
+function renderGuide() {
+  const box = document.getElementById("guideContent");
+  box.innerHTML = `
+    <h3>使い方ガイド</h3>
+    <p>・食べ物と飲料はそれぞれ専用の入力欄があります。</p>
+    <p>・まとめ入力は「、」または「,」で区切ると複数登録できます。</p>
+    <p>・過去の入力は候補として表示されます。</p>
+    <p>・Dashboard と Report で集計が確認できます。</p>
+  `;
+}
+
+
+
 /* =========================
-   全体レンダリング
+   Part6: Settings / Backup / Restore / Clear / Reset
 ========================= */
-function renderAll() {
-  renderLogInput();
+
+/* -------------------------
+   設定ロード
+------------------------- */
+function loadSettingsToUI() {
+  document.getElementById("targetWater").value = settings.targetWater || "";
+  document.getElementById("targetSteps").value = settings.targetSteps || "";
+  document.getElementById("coffeeLimit").value = settings.coffeeLimit || "";
+  document.getElementById("lateSnackAlert").checked = settings.lateSnackAlert || false;
+
+  document.getElementById("d3Dose").value = settings.d3Dose || "";
+  document.getElementById("multiDose").value = settings.multiDose || "";
+  document.getElementById("omegaDose").value = settings.omegaDose || "";
+  document.getElementById("zincDose").value = settings.zincDose || "";
+  document.getElementById("mgDose").value = settings.mgDose || "";
+  document.getElementById("proteinDose").value = settings.proteinDose || "";
+
+  document.getElementById("notify18").checked = settings.notify18 || false;
+  document.getElementById("notify21").checked = settings.notify21 || false;
+  document.getElementById("notify22").checked = settings.notify22 || false;
+}
+
+loadSettingsToUI();
+
+/* -------------------------
+   設定変更イベント
+------------------------- */
+document.querySelectorAll("#tab-settings input").forEach(input => {
+  input.addEventListener("change", () => {
+    settings.targetWater = Number(document.getElementById("targetWater").value || 0);
+    settings.targetSteps = Number(document.getElementById("targetSteps").value || 0);
+    settings.coffeeLimit = Number(document.getElementById("coffeeLimit").value || 0);
+    settings.lateSnackAlert = document.getElementById("lateSnackAlert").checked;
+
+    settings.d3Dose = Number(document.getElementById("d3Dose").value || 0);
+    settings.multiDose = Number(document.getElementById("multiDose").value || 0);
+    settings.omegaDose = Number(document.getElementById("omegaDose").value || 0);
+    settings.zincDose = Number(document.getElementById("zincDose").value || 0);
+    settings.mgDose = Number(document.getElementById("mgDose").value || 0);
+    settings.proteinDose = Number(document.getElementById("proteinDose").value || 0);
+
+    settings.notify18 = document.getElementById("notify18").checked;
+    settings.notify21 = document.getElementById("notify21").checked;
+    settings.notify22 = document.getElementById("notify22").checked;
+
+    saveSettings();
+  });
+});
+
+/* -------------------------
+   バックアップ
+------------------------- */
+document.getElementById("backupBtn").addEventListener("click", () => {
+  const data = {
+    logs,
+    settings
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "food-diary-backup.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+/* -------------------------
+   復元
+------------------------- */
+document.getElementById("restoreBtn").addEventListener("click", () => {
+  const fileInput = document.getElementById("restoreFile");
+  if (!fileInput.files.length) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      logs = data.logs || [];
+      settings = data.settings || {};
+      saveLogs();
+      saveSettings();
+      loadSettingsToUI();
+      renderLogList();
+      alert("復元が完了しました");
+    } catch {
+      alert("復元に失敗しました（ファイルが壊れている可能性があります）");
+    }
+  };
+  reader.readAsText(fileInput.files[0]);
+});
+
+/* -------------------------
+   今日のログ削除
+------------------------- */
+document.getElementById("clearTodayBtn").addEventListener("click", () => {
+  const today = todayStr();
+  logs = logs.filter(l => l.time.slice(0, 10) !== today);
+  saveLogs();
   renderLogList();
-  renderDashboard();
-  renderReports();
-  renderGuide();
-  renderSettings();
-}
+  alert("今日のログを削除しました");
+});
 
-/* =========================
-   初期化
-========================= */
-document.addEventListener("DOMContentLoaded", () => {
-  renderAll();
+/* -------------------------
+   全期間ログ削除
+------------------------- */
+document.getElementById("clearAllLogsBtn").addEventListener("click", () => {
+  if (!confirm("本当に全期間のログを削除しますか？")) return;
+  logs = [];
+  saveLogs();
+  renderLogList();
+  alert("全期間のログを削除しました");
+});
+
+/* -------------------------
+   アプリ初期化（ログ＋設定）
+------------------------- */
+document.getElementById("resetAppBtn").addEventListener("click", () => {
+  if (!confirm("アプリを完全に初期化しますか？（ログ＋設定）")) return;
+
+  logs = [];
+  settings = {};
+  saveLogs();
+  saveSettings();
+  loadSettingsToUI();
+  renderLogList();
+
+  alert("アプリを初期化しました");
 });
