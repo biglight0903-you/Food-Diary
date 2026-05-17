@@ -199,7 +199,9 @@ document.getElementById("addFoodLogBtn").addEventListener("click", () => {
 document.querySelectorAll(".log-btn").forEach(btn => {
   btn.addEventListener("click", () => {
 
-    document.querySelectorAll(".log-btn")
+    const group = btn.parentElement;
+
+    group.querySelectorAll(".log-btn")
       .forEach(b => b.classList.remove("active"));
 
     btn.classList.add("active");
@@ -326,7 +328,9 @@ document.getElementById("addDrinkLogBtn").addEventListener("click", () => {
 document.querySelectorAll(".log-btn").forEach(btn => {
   btn.addEventListener("click", () => {
 
-    document.querySelectorAll(".log-btn")
+    const group = btn.parentElement;
+
+    group.querySelectorAll(".log-btn")
       .forEach(b => b.classList.remove("active"));
 
     btn.classList.add("active");
