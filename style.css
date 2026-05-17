@@ -14,7 +14,9 @@ body {
   padding-bottom: 50px;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin: 0 0 10px;
 }
 
@@ -41,11 +43,14 @@ h1, h2, h3 {
   background: #333;
   color: #ccc;
   font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tab-button.active {
-  background: #fff;
-  color: #000;
+  background: #2ecc71;
+  color: #fff;
   font-weight: bold;
 }
 
@@ -62,10 +67,6 @@ h1, h2, h3 {
 
 .tab-content.active {
   display: block;
-}
-
-
-  border-color: #1e90ff;
 }
 
 /* =========================
@@ -104,7 +105,6 @@ h1, h2, h3 {
   background: #dcdcdc;
 }
 
-/* 選択状態 */
 .log-btn.active {
   background: #1e90ff;
   color: #fff;
@@ -141,16 +141,6 @@ h1, h2, h3 {
   background: #d9534f;
   color: #fff;
 }
-
-/* =========================
-   Active Tabs
-========================= */
-.tab-button.active {
-  background: #2ecc71;
-  color: #fff;
-  font-weight: bold;
-}
-
 
 /* =========================
    Inputs
@@ -307,6 +297,4 @@ textarea {
   .settings-row input[type="checkbox"] {
     width: 100%;
   }
-
-   
 }
