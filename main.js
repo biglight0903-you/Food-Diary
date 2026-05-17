@@ -17,28 +17,33 @@ function todayStr() {
 }
 
 /* =========================
-   Part1: タブ切り替え
+   Part1: タブ切り替え（完全版）
 ========================= */
 
 document.querySelectorAll(".tab-button").forEach(btn => {
   btn.addEventListener("click", () => {
+
+    // タブボタンの active 切り替え
     document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-
     btn.classList.add("active");
-    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
 
+    // タブ内容の切り替え
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    const target = document.getElementById("tab-" + btn.dataset.tab);
+    if (target) target.classList.add("active");
+
+    // タブごとの処理
     if (btn.dataset.tab === "dashboard") renderDashboard();
     if (btn.dataset.tab === "report") renderReport();
     if (btn.dataset.tab === "guide") renderGuide();
+    if (btn.dataset.tab === "log") renderLogList();
   });
 });
 
 /* =========================
-   Part2: ログ追加（v11用に修正）
+   Part2: ログ追加（v11）
 ========================= */
 
-/* カテゴリ・単位の選択状態 */
 let selectedCategory = "";
 let selectedFoodUnit = "";
 let selectedDrinkUnit = "";
@@ -55,84 +60,73 @@ document.querySelectorAll(".log-btn").forEach(btn => {
 /* 単位ボタン */
 document.querySelectorAll(".unit-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    const target = btn.dataset.target; // "foodUnit" or "drinkUnit"
-    document
-      .querySelectorAll(`.unit-btn[data-target="${target}"]`)
+    const target = btn.dataset.target;
+    document.querySelectorAll(`.unit-btn[data-target="${target}"]`)
       .forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    if (target === "foodUnit") selectedFoodUnit = btn.dataset.unit || "";
-    if (target === "drinkUnit") selectedDrinkUnit = btn.dataset.unit || "";
+    if (target === "foodUnit") selectedFoodUnit = btn.dataset.unit;
+    if (target === "drinkUnit") selectedDrinkUnit = btn.dataset.unit;
   });
 });
 
-/* 食べ物ログ追加 */
+/* 食べ物ログ */
 document.getElementById("addFoodLogBtn").addEventListener("click", () => {
-  const name = document.getElementById("foodName").value.trim();
-  const amount = document.getElementById("foodAmount").value.trim();
-  const bulk = document.getElementById("foodBulk").value.trim();
-
+  const name = foodName.value.trim();
+  const amount = foodAmount.value.trim();
+  const bulk = foodBulk.value.trim();
   if (!name && !bulk) return;
 
   const time = new Date().toISOString();
   const cat = selectedCategory ? `[${selectedCategory}]` : "";
-  const unitPart = amount ? `${amount}${selectedFoodUnit || ""}` : "";
-  const main = name ? `${name}${unitPart ? " " + unitPart : ""}` : "";
+  const unit = amount ? `${amount}${selectedFoodUnit || ""}` : "";
+  const main = name ? `${name}${unit ? " " + unit : ""}` : "";
   const bulkPart = bulk ? ` / bulk: ${bulk}` : "";
 
-  const text = `${cat} Food: ${[main, bulkPart].filter(Boolean).join("")}`;
-
-  logs.push({ time, text });
+  logs.push({ time, text: `${cat} Food: ${main}${bulkPart}` });
   saveLogs();
-
-  document.getElementById("foodName").value = "";
-  document.getElementById("foodAmount").value = "";
-  document.getElementById("foodBulk").value = "";
-
   renderLogList();
+
+  foodName.value = "";
+  foodAmount.value = "";
+  foodBulk.value = "";
 });
 
-/* 飲料ログ追加 */
+/* 飲料ログ */
 document.getElementById("addDrinkLogBtn").addEventListener("click", () => {
-  const name = document.getElementById("drinkName").value.trim();
-  const amount = document.getElementById("drinkAmount").value.trim();
-  const bulk = document.getElementById("drinkBulk").value.trim();
-
+  const name = drinkName.value.trim();
+  const amount = drinkAmount.value.trim();
+  const bulk = drinkBulk.value.trim();
   if (!name && !bulk) return;
 
   const time = new Date().toISOString();
   const cat = selectedCategory ? `[${selectedCategory}]` : "";
-  const unitPart = amount ? `${amount}${selectedDrinkUnit || ""}` : "";
-  const main = name ? `${name}${unitPart ? " " + unitPart : ""}` : "";
+  const unit = amount ? `${amount}${selectedDrinkUnit || ""}` : "";
+  const main = name ? `${name}${unit ? " " + unit : ""}` : "";
   const bulkPart = bulk ? ` / bulk: ${bulk}` : "";
 
-  const text = `${cat} Drink: ${[main, bulkPart].filter(Boolean).join("")}`;
-
-  logs.push({ time, text });
+  logs.push({ time, text: `${cat} Drink: ${main}${bulkPart}` });
   saveLogs();
-
-  document.getElementById("drinkName").value = "";
-  document.getElementById("drinkAmount").value = "";
-  document.getElementById("drinkBulk").value = "";
-
   renderLogList();
+
+  drinkName.value = "";
+  drinkAmount.value = "";
+  drinkBulk.value = "";
 });
 
-/* サプリ・体調・運動ログ追加 */
+/* その他ログ */
 document.getElementById("addMiscLogBtn").addEventListener("click", () => {
-  const misc = document.getElementById("miscText").value.trim();
+  const misc = miscText.value.trim();
   if (!misc && !selectedCategory) return;
 
   const time = new Date().toISOString();
   const cat = selectedCategory ? `[${selectedCategory}]` : "";
-  const text = `${cat} Misc: ${misc || ""}`;
 
-  logs.push({ time, text });
+  logs.push({ time, text: `${cat} Misc: ${misc}` });
   saveLogs();
-
-  document.getElementById("miscText").value = "";
-
   renderLogList();
+
+  miscText.value = "";
 });
 
 /* =========================
@@ -140,22 +134,20 @@ document.getElementById("addMiscLogBtn").addEventListener("click", () => {
 ========================= */
 
 function renderLogList() {
-  const list = document.getElementById("logList");
-  list.innerHTML = logs
+  logList.innerHTML = logs
     .map((l, i) => {
       const t = new Date(l.time);
       const hh = String(t.getHours()).padStart(2, "0");
       const mm = String(t.getMinutes()).padStart(2, "0");
       return `
-        <div class="log-item-row">
-          <div class="log-main">${hh}:${mm}｜${l.text}</div>
-          <button class="log-delete-btn" onclick="deleteLog(${i})">削除</button>
+        <div class="log-item">
+          <div>${hh}:${mm}｜${l.text}</div>
+          <button class="delete-log-btn" onclick="deleteLog(${i})">削除</button>
         </div>
       `;
     })
     .join("");
 }
-renderLogList();
 
 function deleteLog(i) {
   logs.splice(i, 1);
@@ -168,11 +160,8 @@ function deleteLog(i) {
 ========================= */
 
 function renderDashboard() {
-  const box = document.getElementById("dashboardContent");
-  const dateInfo = document.getElementById("dashboardDateInfo");
   const today = todayStr();
-
-  dateInfo.textContent = `対象日：${today}`;
+  dashboardDateInfo.textContent = `対象日：${today}`;
 
   let water = 0;
   let coffee = 0;
@@ -180,24 +169,21 @@ function renderDashboard() {
   logs.forEach(l => {
     if (!l.time.startsWith(today)) return;
 
-    if (l.text.includes("水") || l.text.includes("Drink")) {
-      const m = l.text.match(/(\d+)(ml|L|cc)/);
-      if (m) {
-        let val = Number(m[1]);
-        const unit = m[2];
-        if (unit === "L") val = val * 1000;
-        water += val;
-      }
+    const m = l.text.match(/(\d+)(ml|L|cc)/);
+    if (m) {
+      let val = Number(m[1]);
+      if (m[2] === "L") val *= 1000;
+      water += val;
     }
+
     if (l.text.includes("コーヒー")) coffee++;
   });
 
-  box.innerHTML = `
+  dashboardContent.innerHTML = `
     <div class="dashboard-card">
       <div class="dashboard-label">水分摂取</div>
       <div class="dashboard-value">${water} ml</div>
     </div>
-
     <div class="dashboard-card">
       <div class="dashboard-label">コーヒー</div>
       <div class="dashboard-value">${coffee} 杯</div>
@@ -210,25 +196,22 @@ function renderDashboard() {
 ========================= */
 
 function renderReport() {
-  const box = document.getElementById("reportContent");
-  const dateInfo = document.getElementById("reportDateInfo");
   const today = todayStr();
-
-  dateInfo.textContent = `対象日：${today}`;
+  reportDateInfo.textContent = `対象日：${today}`;
 
   const count = {};
   logs.forEach(l => {
     if (!l.time.startsWith(today)) return;
-    const keyMatch = l.text.match(/^
+    const m = l.text.match(/^
 
 \[(.+?)\]
 
 /);
-    const key = keyMatch ? keyMatch[1] : "その他";
+    const key = m ? m[1] : "その他";
     count[key] = (count[key] || 0) + 1;
   });
 
-  box.innerHTML = `
+  reportContent.innerHTML = `
     <div class="dashboard-card">
       <h3>カテゴリ別 回数</h3>
       <ul>
@@ -241,133 +224,114 @@ function renderReport() {
 }
 
 /* =========================
-   Part6: Settings / Backup / Restore / Clear / Reset
+   Part6: Settings
 ========================= */
 
-/* 設定ロード */
 function loadSettingsToUI() {
-  document.getElementById("targetWater").value = settings.targetWater || "";
-  document.getElementById("targetSteps").value = settings.targetSteps || "";
-  document.getElementById("coffeeLimit").value = settings.coffeeLimit || "";
-  document.getElementById("lateSnackAlert").checked = settings.lateSnackAlert || false;
+  targetWater.value = settings.targetWater || "";
+  targetSteps.value = settings.targetSteps || "";
+  coffeeLimit.value = settings.coffeeLimit || "";
+  lateSnackAlert.checked = settings.lateSnackAlert || false;
 
-  document.getElementById("d3Dose").value = settings.d3Dose || "";
-  document.getElementById("multiDose").value = settings.multiDose || "";
-  document.getElementById("omegaDose").value = settings.omegaDose || "";
-  document.getElementById("zincDose").value = settings.zincDose || "";
-  document.getElementById("mgDose").value = settings.mgDose || "";
-  document.getElementById("proteinDose").value = settings.proteinDose || "";
+  d3Dose.value = settings.d3Dose || "";
+  multiDose.value = settings.multiDose || "";
+  omegaDose.value = settings.omegaDose || "";
+  zincDose.value = settings.zincDose || "";
+  mgDose.value = settings.mgDose || "";
+  proteinDose.value = settings.proteinDose || "";
 
-  document.getElementById("notify18").checked = settings.notify18 || false;
-  document.getElementById("notify21").checked = settings.notify21 || false;
-  document.getElementById("notify22").checked = settings.notify22 || false;
+  notify18.checked = settings.notify18 || false;
+  notify21.checked = settings.notify21 || false;
+  notify22.checked = settings.notify22 || false;
 }
 loadSettingsToUI();
 
-/* 設定変更イベント */
 document.querySelectorAll("#tab-settings input").forEach(input => {
   input.addEventListener("change", () => {
-    settings.targetWater = Number(document.getElementById("targetWater").value || 0);
-    settings.targetSteps = Number(document.getElementById("targetSteps").value || 0);
-    settings.coffeeLimit = Number(document.getElementById("coffeeLimit").value || 0);
-    settings.lateSnackAlert = document.getElementById("lateSnackAlert").checked;
+    settings.targetWater = Number(targetWater.value || 0);
+    settings.targetSteps = Number(targetSteps.value || 0);
+    settings.coffeeLimit = Number(coffeeLimit.value || 0);
+    settings.lateSnackAlert = lateSnackAlert.checked;
 
-    settings.d3Dose = Number(document.getElementById("d3Dose").value || 0);
-    settings.multiDose = Number(document.getElementById("multiDose").value || 0);
-    settings.omegaDose = Number(document.getElementById("omegaDose").value || 0);
-    settings.zincDose = Number(document.getElementById("zincDose").value || 0);
-    settings.mgDose = Number(document.getElementById("mgDose").value || 0);
-    settings.proteinDose = Number(document.getElementById("proteinDose").value || 0);
+    settings.d3Dose = Number(d3Dose.value || 0);
+    settings.multiDose = Number(multiDose.value || 0);
+    settings.omegaDose = Number(omegaDose.value || 0);
+    settings.zincDose = Number(zincDose.value || 0);
+    settings.mgDose = Number(mgDose.value || 0);
+    settings.proteinDose = Number(proteinDose.value || 0);
 
-    settings.notify18 = document.getElementById("notify18").checked;
-    settings.notify21 = document.getElementById("notify21").checked;
-    settings.notify22 = document.getElementById("notify22").checked;
+    settings.notify18 = notify18.checked;
+    settings.notify21 = notify21.checked;
+    settings.notify22 = notify22.checked;
 
     saveSettings();
   });
 });
 
 /* バックアップ */
-document.getElementById("backupBtn").addEventListener("click", () => {
+backupBtn.addEventListener("click", () => {
   const data = { logs, settings };
-
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement("a");
   a.href = url;
   a.download = "food-diary-backup.json";
   a.click();
-
   URL.revokeObjectURL(url);
 });
 
 /* 復元 */
-document.getElementById("restoreBtn").addEventListener("click", () => {
-  const fileInput = document.getElementById("restoreFile");
-  if (!fileInput.files.length) return;
-
+restoreBtn.addEventListener("click", () => {
+  if (!restoreFile.files.length) return;
   const reader = new FileReader();
   reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      logs = data.logs || [];
-      settings = data.settings || {};
-      saveLogs();
-      saveSettings();
-      loadSettingsToUI();
-      renderLogList();
-      alert("復元が完了しました");
-    } catch {
-      alert("復元に失敗しました（ファイルが壊れている可能性があります）");
-    }
+    const data = JSON.parse(e.target.result);
+    logs = data.logs || [];
+    settings = data.settings || {};
+    saveLogs();
+    saveSettings();
+    loadSettingsToUI();
+    renderLogList();
+    alert("復元が完了しました");
   };
-  reader.readAsText(fileInput.files[0]);
+  reader.readAsText(restoreFile.files[0]);
 });
 
-/* 今日のログ削除 */
-document.getElementById("clearTodayBtn").addEventListener("click", () => {
+/* 今日削除 */
+clearTodayBtn.addEventListener("click", () => {
   const today = todayStr();
-  logs = logs.filter(l => l.time.slice(0, 10) !== today);
+  logs = logs.filter(l => !l.time.startsWith(today));
   saveLogs();
   renderLogList();
-  alert("今日のログを削除しました");
 });
 
-/* 全期間ログ削除 */
-document.getElementById("clearAllLogsBtn").addEventListener("click", () => {
-  if (!confirm("本当に全期間のログを削除しますか？")) return;
+/* 全削除 */
+clearAllLogsBtn.addEventListener("click", () => {
+  if (!confirm("全期間のログを削除しますか？")) return;
   logs = [];
   saveLogs();
   renderLogList();
-  alert("全期間のログを削除しました");
 });
 
-/* アプリ初期化 */
-document.getElementById("resetAppBtn").addEventListener("click", () => {
-  if (!confirm("アプリを完全に初期化しますか？（ログ＋設定）")) return;
-
+/* 初期化 */
+resetAppBtn.addEventListener("click", () => {
+  if (!confirm("アプリを初期化しますか？")) return;
   logs = [];
   settings = {};
   saveLogs();
   saveSettings();
   loadSettingsToUI();
   renderLogList();
-
-  alert("アプリを初期化しました");
 });
 
 /* =========================
-   Part7: Guide（追加）
+   Part7: Guide（必須）
 ========================= */
 
 function renderGuide() {
-  const box = document.getElementById("guideContent");
-  if (!box) return;
-
-  box.innerHTML = `
+  guideContent.innerHTML = `
     <h3>Guide</h3>
-    <p>ここにガイド内容を入れる</p>
+    <p>Food / Drink / サプリ・体調・運動を記録できます。</p>
+    <p>Settings で目標や通知を設定できます。</p>
   `;
 }
-
