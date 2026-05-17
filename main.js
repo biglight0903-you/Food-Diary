@@ -216,11 +216,7 @@ function renderReport() {
   const count = {};
   logs.forEach(l => {
     if (!l.time.startsWith(today)) return;
-    const m = l.text.match(/^
-
-\[(.+?)\]
-
-/);
+    const m = l.text.match(/\[(.+?)\]/);
     const key = m ? m[1] : "その他";
     count[key] = (count[key] || 0) + 1;
   });
