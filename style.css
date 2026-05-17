@@ -119,6 +119,11 @@ h1, h2, h3 {
   color: #fff;
 }
 
+.log-btn.active {
+  background: #007bff;
+  color: #fff;
+}
+
 /* =========================
    Inputs
 ========================= */
