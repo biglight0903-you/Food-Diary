@@ -1,81 +1,281 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>Food Diary v10.1</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>Food Diary v11.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
-  <header class="app-header">
-    <h1>Food Diary v10.1</h1>
-  </header>
+  <div id="app">
+    <header class="app-header">
+      <h1>Food Diary v11.0</h1>
+      <nav class="tabs">
+        <button class="tab-button active" data-tab="log">Log</button>
+        <button class="tab-button" data-tab="dashboard">Dashboard</button>
+        <button class="tab-button" data-tab="report">Report</button>
+        <button class="tab-button" data-tab="guide">Guide</button>
+        <button class="tab-button" data-tab="settings">Settings</button>
+      </nav>
+    </header>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-    <button class="tab-btn" data-tab="log">Log</button>
-    <button class="tab-btn" data-tab="report">Report</button>
-    <button class="tab-btn" data-tab="guide">Guide</button>
-    <button class="tab-btn" data-tab="settings">Settings</button>
-  </nav>
+    <main class="app-main">
 
-  <main class="tab-contents">
-    <!-- Dashboard -->
-    <section id="dashboard" class="tab-content active">
-      <div id="dashboardToday"></div>
-      <div id="dashboardTrends"></div>
-    </section>
+      <!-- Log -->
+      <section id="tab-log" class="tab-content active">
+        <h2>Log</h2>
 
-    <!-- Log -->
-    <section id="log" class="tab-content">
-      <div id="logInputArea"></div>
-      <div id="logList"></div>
-    </section>
+        <!-- 食べ物系 -->
+        <div class="log-section">
+          <h3>食べ物系（Food）</h3>
 
-    <!-- Report -->
-    <section id="report" class="tab-content">
-      <div id="weeklyReport"></div>
-      <div id="monthlyReport"></div>
-      <div id="yearlyReport"></div>
-    </section>
+          <div class="button-group">
+            <button class="log-btn" data-category="食事">食事</button>
+            <button class="log-btn" data-category="朝食">朝食</button>
+            <button class="log-btn" data-category="昼食">昼食</button>
+            <button class="log-btn" data-category="夕食">夕食</button>
+            <button class="log-btn" data-category="間食">間食</button>
+            <button class="log-btn" data-category="例外">例外</button>
+            <button class="log-btn" data-category="外食">外食</button>
+            <button class="log-btn" data-category="食べすぎ">食べすぎ</button>
+            <button class="log-btn" data-category="夜食">夜食</button>
+          </div>
 
-    <!-- Guide -->
-    <section id="guide" class="tab-content">
-      <div id="guideContent"></div>
-    </section>
+          <div class="log-input-block">
+            <label>品名（単品）</label>
+            <input type="text" id="foodName" placeholder="例：オイコス バニラ">
+            <div class="suggestions" id="foodNameSuggestions"></div>
+          </div>
 
-    <!-- Settings -->
-    <section id="settings" class="tab-content">
-      <div class="dash-block">
-        <div class="dash-title">設定</div>
+          <div class="log-input-row">
+            <div>
+              <label>量の単位</label>
+              <div class="button-group small">
+                <button class="unit-btn" data-target="foodUnit" data-unit="g">g</button>
+                <button class="unit-btn" data-target="foodUnit" data-unit="個">個</button>
+                <button class="unit-btn" data-target="foodUnit" data-unit="kcal">kcal</button>
+                <button class="unit-btn" data-target="foodUnit" data-unit="P">P</button>
+              </div>
+            </div>
+            <div>
+              <label>量</label>
+              <input type="number" id="foodAmount" placeholder="例：12">
+            </div>
+          </div>
 
-        <div class="setting-row">
-          <label>
-            <input type="checkbox" id="notify18" />
-            18:00 に「水 200ml」を通知
-          </label>
+          <div class="log-input-block">
+            <label>まとめ入力（「、」または「,」で区切る）</label>
+            <textarea id="foodBulk" rows="2" placeholder="例：卵2個、納豆、味噌汁"></textarea>
+          </div>
+
+          <button id="addFoodLogBtn" class="primary-btn">食べ物ログを追加</button>
         </div>
 
-        <div class="setting-row">
-          <label>
-            目標水分量（ml）：
-            <input type="number" id="targetWater" min="0" step="100" />
-          </label>
+        <hr>
+
+        <!-- 飲料系 -->
+        <div class="log-section">
+          <h3>飲料系（Drink）</h3>
+
+          <div class="button-group">
+            <button class="log-btn" data-category="飲料">飲料</button>
+            <button class="log-btn" data-category="水">水</button>
+            <button class="log-btn" data-category="コーヒー">コーヒー</button>
+            <button class="log-btn" data-category="お茶">お茶</button>
+            <button class="log-btn" data-category="炭酸水">炭酸水</button>
+            <button class="log-btn" data-category="酒">酒</button>
+          </div>
+
+          <div class="log-input-block">
+            <label>品名（単品）</label>
+            <input type="text" id="drinkName" placeholder="例：コーラゼロ">
+            <div class="suggestions" id="drinkNameSuggestions"></div>
+          </div>
+
+          <div class="log-input-row">
+            <div>
+              <label>量の単位</label>
+              <div class="button-group small">
+                <button class="unit-btn" data-target="drinkUnit" data-unit="ml">ml</button>
+                <button class="unit-btn" data-target="drinkUnit" data-unit="L">L</button>
+                <button class="unit-btn" data-target="drinkUnit" data-unit="cc">cc</button>
+              </div>
+            </div>
+            <div>
+              <label>量</label>
+              <input type="number" id="drinkAmount" placeholder="例：500">
+            </div>
+          </div>
+
+          <div class="log-input-block">
+            <label>まとめ入力（「、」または「,」で区切る）</label>
+            <textarea id="drinkBulk" rows="2" placeholder="例：水500ml、コーラゼロ350ml"></textarea>
+          </div>
+
+          <button id="addDrinkLogBtn" class="primary-btn">飲料ログを追加</button>
         </div>
 
-        <div class="setting-row">
-          <button id="backupBtn">バックアップをダウンロード</button>
+        <hr>
+
+        <!-- サプリ・体調・運動 -->
+        <div class="log-section">
+          <h3>サプリ・体調・運動</h3>
+
+          <div class="button-group">
+            <button class="log-btn" data-category="サプリ">サプリ</button>
+            <button class="log-btn" data-category="D3">D3</button>
+            <button class="log-btn" data-category="マルチビタミン">マルチビタミン</button>
+            <button class="log-btn" data-category="オメガ3">オメガ3</button>
+            <button class="log-btn" data-category="亜鉛">亜鉛</button>
+            <button class="log-btn" data-category="マグネシウム">マグネシウム</button>
+            <button class="log-btn" data-category="サイリウム">サイリウム</button>
+            <button class="log-btn" data-category="プロテイン">プロテイン</button>
+          </div>
+
+          <div class="button-group">
+            <button class="log-btn" data-category="体調">体調</button>
+            <button class="log-btn" data-category="頭痛">頭痛</button>
+            <button class="log-btn" data-category="眠気">眠気</button>
+            <button class="log-btn" data-category="だるさ">だるさ</button>
+            <button class="log-btn" data-category="集中力低下">集中力低下</button>
+          </div>
+
+          <div class="button-group">
+            <button class="log-btn" data-category="運動">運動</button>
+            <button class="log-btn" data-category="徒歩">徒歩</button>
+            <button class="log-btn" data-category="ラン">ラン</button>
+            <button class="log-btn" data-category="スクワット">スクワット</button>
+            <button class="log-btn" data-category="ストレッチ">ストレッチ</button>
+          </div>
+
+          <div class="log-input-block">
+            <label>自由入力</label>
+            <input type="text" id="miscText" placeholder="例：頭痛 強め、徒歩 20分 など">
+            <div class="suggestions" id="miscTextSuggestions"></div>
+          </div>
+
+          <button id="addMiscLogBtn" class="primary-btn">その他ログを追加</button>
         </div>
 
-        <div class="setting-row">
-          <input type="file" id="restoreFile" />
-          <button id="restoreBtn">バックアップから復元</button>
+        <hr>
+
+        <div class="log-list-wrapper">
+          <h3>ログ一覧</h3>
+          <div id="logList"></div>
+        </div>
+      </section>
+
+      <!-- Dashboard -->
+      <section id="tab-dashboard" class="tab-content">
+        <h2>Dashboard</h2>
+        <div id="dashboardDateInfo" class="date-info"></div>
+        <div id="dashboardContent"></div>
+      </section>
+
+      <!-- Report -->
+      <section id="tab-report" class="tab-content">
+        <h2>Report</h2>
+        <div id="reportDateInfo" class="date-info"></div>
+        <div id="reportContent"></div>
+      </section>
+
+      <!-- Guide -->
+      <section id="tab-guide" class="tab-content">
+        <div id="guideContent"></div>
+      </section>
+
+      <!-- Settings -->
+      <section id="tab-settings" class="tab-content">
+        <h2>Settings</h2>
+
+        <div class="settings-section">
+          <h3>目標設定</h3>
+          <div class="settings-row">
+            <label for="targetWater">水分目標（ml）</label>
+            <input type="number" id="targetWater" min="0" step="100">
+          </div>
+          <div class="settings-row">
+            <label for="targetSteps">歩数目標（歩）</label>
+            <input type="number" id="targetSteps" min="0" step="500">
+          </div>
+          <div class="settings-row">
+            <label for="coffeeLimit">コーヒー上限（杯）</label>
+            <input type="number" id="coffeeLimit" min="0" step="1">
+          </div>
+          <div class="settings-row checkbox-row">
+            <label for="lateSnackAlert">深夜食アラート</label>
+            <input type="checkbox" id="lateSnackAlert">
+          </div>
         </div>
 
-      </div>
-    </section>
-  </main>
+        <div class="settings-section">
+          <h3>サプリ規定量</h3>
+          <div class="settings-row">
+            <label for="d3Dose">D3（IU）</label>
+            <input type="number" id="d3Dose" min="0" step="1000">
+          </div>
+          <div class="settings-row">
+            <label for="multiDose">マルチ（粒）</label>
+            <input type="number" id="multiDose" min="0" step="1">
+          </div>
+          <div class="settings-row">
+            <label for="omegaDose">オメガ3（粒）</label>
+            <input type="number" id="omegaDose" min="0" step="1">
+          </div>
+          <div class="settings-row">
+            <label for="zincDose">亜鉛（mg）</label>
+            <input type="number" id="zincDose" min="0" step="5">
+          </div>
+          <div class="settings-row">
+            <label for="mgDose">Mg（mg）</label>
+            <input type="number" id="mgDose" min="0" step="50">
+          </div>
+          <div class="settings-row">
+            <label for="proteinDose">プロテイン（g/回）</label>
+            <input type="number" id="proteinDose" min="0" step="5">
+          </div>
+        </div>
 
-  <script src="main.js"></script>
+        <div class="settings-section">
+          <h3>通知設定</h3>
+          <div class="settings-row checkbox-row">
+            <label for="notify18">18:00 水分リマインド</label>
+            <input type="checkbox" id="notify18">
+          </div>
+          <div class="settings-row checkbox-row">
+            <label for="notify21">21:00 深夜食アラート</label>
+            <input type="checkbox" id="notify21">
+          </div>
+          <div class="settings-row checkbox-row">
+            <label for="notify22">22:00 就寝準備リマインド</label>
+            <input type="checkbox" id="notify22">
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>データ管理</h3>
+          <div class="settings-row">
+            <button id="backupBtn" class="secondary-btn">バックアップをダウンロード</button>
+          </div>
+          <div class="settings-row">
+            <input type="file" id="restoreFile" accept="application/json">
+            <button id="restoreBtn" class="secondary-btn">バックアップから復元</button>
+          </div>
+          <div class="settings-row danger-row">
+            <button id="clearTodayBtn" class="danger-btn">今日のログを全削除</button>
+          </div>
+          <div class="settings-row danger-row">
+            <button id="clearAllLogsBtn" class="danger-btn">全期間のログを削除</button>
+          </div>
+          <div class="settings-row danger-row">
+            <button id="resetAppBtn" class="danger-btn">アプリを初期化（ログ＋設定）</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="main.js?v=11"></script>
 </body>
 </html>
