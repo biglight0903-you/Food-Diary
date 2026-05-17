@@ -10,73 +10,77 @@
 
   <!-- タブ -->
   <div class="tabs">
-    <button class="tab-button active" data-tab="guide">Guide</button>
-    <button class="tab-button" data-tab="manage">管理</button>
+    <button class="tab-button active" data-tab="input">入力</button>
+    <button class="tab-button" data-tab="dashboard">Dashboard</button>
+    <button class="tab-button" data-tab="report">Report</button>
+    <button class="tab-button" data-tab="guide">Guide</button>
+    <button class="tab-button" data-tab="settings">Settings</button>
+  </div>
+
+  <!-- 入力 -->
+  <div id="tab-input" class="tab-content active">
+    <div class="input-block">
+      <h3>内容</h3>
+      <input id="textInput" placeholder="例：水200ml / D3 / 牛丼">
+      <button id="addLogBtn">追加</button>
+    </div>
+    <div id="logList" class="log-list"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="tab-dashboard" class="tab-content">
+    <div id="dashboardContent"></div>
+  </div>
+
+  <!-- Report -->
+  <div id="tab-report" class="tab-content">
+    <div id="reportContent"></div>
   </div>
 
   <!-- Guide -->
-  <div id="tab-guide" class="tab-content active">
+  <div id="tab-guide" class="tab-content">
     <div id="guideContent"></div>
   </div>
 
-  <!-- 管理 -->
-  <div id="tab-manage" class="tab-content">
+  <!-- Settings -->
+  <div id="tab-settings" class="tab-content">
+    <h3>設定</h3>
 
-    <!-- 固有名詞ボタン -->
-    <div class="card">
-      <div class="card-header">固有名詞ボタン</div>
-      <div class="button-group">
-        <button class="btn" onclick="quickAdd('マルチビタミン')">マルチ</button>
-        <button class="btn" onclick="quickAdd('ビタミンD3')">D3</button>
-        <button class="btn" onclick="quickAdd('オメガ3')">オメガ3</button>
-        <button class="btn" onclick="quickAdd('亜鉛')">亜鉛</button>
-        <button class="btn" onclick="quickAdd('マグネシウム')">マグネ</button>
-        <button class="btn" onclick="quickAdd('サイリウム')">サイリウム</button>
-        <button class="btn" onclick="quickAdd('コーヒー')">コーヒー</button>
-      </div>
+    <label>水分目標（ml）</label>
+    <input id="targetWater" type="number">
 
-      <p style="margin-top:10px; font-weight:bold;">水（50ml刻み）</p>
-      <div class="button-group">
-        <script>
-          for (let i=50; i<=500; i+=50) {
-            document.write(`<button class="btn" onclick="quickAdd('水${i}ml')">水${i}</button>`);
-          }
-        </script>
-      </div>
-    </div>
+    <label>歩数目標</label>
+    <input id="targetSteps" type="number">
 
-    <!-- カテゴリ -->
-    <div class="card">
-      <div class="card-header">カテゴリ（複数選択可）</div>
-      <div id="categoryButtons" class="button-group">
-        <script>
-          const categories = ["朝食","昼食","夕食","間食","食事","飲料","菓子","サプリ","薬","運動","体調","例外処理"];
-          categories.forEach(cat => {
-            document.write(`<button class="btn" onclick="toggleCategory(this,'${cat}')">${cat}</button>`);
-          });
-        </script>
-      </div>
-    </div>
+    <label>コーヒー上限（杯）</label>
+    <input id="coffeeLimit" type="number">
 
-    <!-- 入力 -->
-    <div class="card">
-      <div class="card-header">内容入力</div>
-      <input id="textInput" placeholder="例：コーラ200ml / 牛丼 / 薬A" onfocus="showSuggestions()" oninput="filterSuggestions()">
-      <div id="suggestionBox" class="suggestion-box"></div>
-      <button class="btn btn-solid" onclick="addLog()">＋ 記録する</button>
-    </div>
+    <label><input id="lateSnackAlert" type="checkbox"> 夜食アラート</label>
 
-    <!-- 今日の記録 -->
-    <div class="card">
-      <div class="card-header">今日の記録</div>
-      <ul id="logList"></ul>
-      <button class="btn btn-danger" onclick="clearAllLogs()">全削除</button>
-    </div>
+    <h3>サプリ量</h3>
+    <label>D3</label><input id="d3Dose" type="number">
+    <label>マルチ</label><input id="multiDose" type="number">
+    <label>オメガ3</label><input id="omegaDose" type="number">
+    <label>亜鉛</label><input id="zincDose" type="number">
+    <label>マグネ</label><input id="mgDose" type="number">
+    <label>プロテイン</label><input id="proteinDose" type="number">
 
-    <!-- AI解析 -->
-    <button class="btn btn-solid" onclick="analyzeLogs()">AI解析する</button>
-    <div id="analysisResult"></div>
+    <h3>通知</h3>
+    <label><input id="notify18" type="checkbox"> 18時通知</label>
+    <label><input id="notify21" type="checkbox"> 21時通知</label>
+    <label><input id="notify22" type="checkbox"> 22時通知</label>
 
+    <h3>バックアップ</h3>
+    <button id="backupBtn">バックアップ</button>
+    <input id="restoreFile" type="file">
+    <button id="restoreBtn">復元</button>
+
+    <h3>削除</h3>
+    <button id="clearTodayBtn">今日のログ削除</button>
+    <button id="clearAllLogsBtn">全期間ログ削除</button>
+
+    <h3>初期化</h3>
+    <button id="resetAppBtn">アプリ初期化</button>
   </div>
 
   <script src="main.js"></script>
