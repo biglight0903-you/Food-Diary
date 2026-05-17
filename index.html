@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Food Diary v11.1</title>
+  <title>Food Diary v11.2</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -17,135 +17,59 @@
     <button class="tab-button" data-tab="settings">Settings</button>
   </div>
 
-  <!-- 入力タブ -->
+  <!-- 入力 -->
   <div id="tab-input" class="tab-content active">
 
-    <!-- カテゴリーボタン -->
     <div class="category-box">
-      <button class="log-btn" data-category="食事">食事</button>
       <button class="log-btn" data-category="朝食">朝食</button>
       <button class="log-btn" data-category="昼食">昼食</button>
       <button class="log-btn" data-category="夕食">夕食</button>
       <button class="log-btn" data-category="間食">間食</button>
-      <button class="log-btn" data-category="例外">例外</button>
-      <button class="log-btn" data-category="外食">外食</button>
-      <button class="log-btn" data-category="夜食">夜食</button>
-
       <button class="log-btn" data-category="飲料">飲料</button>
       <button class="log-btn" data-category="水">水</button>
       <button class="log-btn" data-category="コーヒー">コーヒー</button>
-      <button class="log-btn" data-category="お茶">お茶</button>
-      <button class="log-btn" data-category="炭酸水">炭酸水</button>
-      <button class="log-btn" data-category="酒">酒</button>
-
       <button class="log-btn" data-category="サプリ">サプリ</button>
       <button class="log-btn" data-category="体調">体調</button>
       <button class="log-btn" data-category="運動">運動</button>
-      <button class="log-btn" data-category="その他">その他</button>
+      <button class="log-btn" data-category="例外">例外</button>
     </div>
 
-    <!-- 食べ物入力 -->
     <div class="input-block">
-      <h3>食べ物</h3>
-      <input id="foodName" placeholder="食べ物名">
-      <div id="foodNameSuggestions" class="suggest-box"></div>
-
-      <input id="foodAmount" placeholder="量">
-      <div class="unit-row">
-        <button class="unit-btn" data-target="foodUnit" data-unit="g">g</button>
-        <button class="unit-btn" data-target="foodUnit" data-unit="個">個</button>
-        <button class="unit-btn" data-target="foodUnit" data-unit="皿">皿</button>
-      </div>
-
-      <textarea id="foodBulk" placeholder="まとめ入力（例：卵2個、納豆、味噌汁）"></textarea>
-      <button id="addFoodLogBtn">追加</button>
+      <h3>内容</h3>
+      <input id="textInput" placeholder="例：水200ml / D3 / 牛丼">
+      <div id="suggestBox" class="suggest-box"></div>
+      <button id="addLogBtn">追加</button>
     </div>
 
-    <!-- 飲料入力 -->
-    <div class="input-block">
-      <h3>飲料</h3>
-      <input id="drinkName" placeholder="飲み物名">
-      <div id="drinkNameSuggestions" class="suggest-box"></div>
-
-      <input id="drinkAmount" placeholder="量">
-      <div class="unit-row">
-        <button class="unit-btn" data-target="drinkUnit" data-unit="ml">ml</button>
-        <button class="unit-btn" data-target="drinkUnit" data-unit="L">L</button>
-      </div>
-
-      <textarea id="drinkBulk" placeholder="まとめ入力（例：水500ml、コーラゼロ350ml）"></textarea>
-      <button id="addDrinkLogBtn">追加</button>
-    </div>
-
-    <!-- その他入力 -->
-    <div class="input-block">
-      <h3>サプリ / 体調 / 運動 / その他</h3>
-      <input id="miscText" placeholder="例：D3 2000IU、徒歩20分、頭痛">
-      <div id="miscTextSuggestions" class="suggest-box"></div>
-      <button id="addMiscLogBtn">追加</button>
-    </div>
-
-    <!-- ログ一覧 -->
     <div id="logList" class="log-list"></div>
 
   </div>
 
   <!-- Dashboard -->
   <div id="tab-dashboard" class="tab-content">
-    <div id="dashboardDateInfo"></div>
     <div id="dashboardContent"></div>
   </div>
 
   <!-- Report -->
   <div id="tab-report" class="tab-content">
-    <div id="reportDateInfo"></div>
     <div id="reportContent"></div>
   </div>
 
-  <!-- Guide（全部入り） -->
+  <!-- Guide -->
   <div id="tab-guide" class="tab-content">
     <div id="guideContent"></div>
   </div>
 
   <!-- Settings -->
   <div id="tab-settings" class="tab-content">
-
     <h3>設定</h3>
-
     <label>水分目標（ml）</label>
     <input id="targetWater" type="number">
-
-    <label>歩数目標</label>
-    <input id="targetSteps" type="number">
 
     <label>コーヒー上限（杯）</label>
     <input id="coffeeLimit" type="number">
 
-    <label><input id="lateSnackAlert" type="checkbox"> 夜食アラート</label>
-
-    <h3>サプリ設定</h3>
-    <label>D3（IU）</label><input id="d3Dose" type="number">
-    <label>マルチ</label><input id="multiDose" type="number">
-    <label>オメガ3</label><input id="omegaDose" type="number">
-    <label>亜鉛</label><input id="zincDose" type="number">
-    <label>マグネシウム</label><input id="mgDose" type="number">
-    <label>プロテイン（g）</label><input id="proteinDose" type="number">
-
-    <h3>通知</h3>
-    <label><input id="notify18" type="checkbox"> 18時通知</label>
-    <label><input id="notify21" type="checkbox"> 21時通知</label>
-    <label><input id="notify22" type="checkbox"> 22時通知</label>
-
-    <h3>バックアップ</h3>
-    <button id="backupBtn">バックアップ</button>
-    <input id="restoreFile" type="file">
-    <button id="restoreBtn">復元</button>
-
-    <h3>削除</h3>
-    <button id="clearTodayBtn">今日のログ削除</button>
-    <button id="clearAllLogsBtn">全期間ログ削除</button>
     <button id="resetAppBtn">アプリ初期化</button>
-
   </div>
 
   <script src="main.js"></script>
