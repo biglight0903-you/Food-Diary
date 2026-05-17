@@ -672,13 +672,6 @@ function renderGuide() {
       </div>
   `;
 
-  const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム", "プロテイン"];
-  g.innerHTML = g.innerHTML.replace(
-    new RegExp(words.join("|"), "g"),
-    (match) => `<span class="highlight">${match}</span>`
-  );
-}
-
 g.innerHTML += `
       <h2>7. 期待される変化（KPI）</h2>
 
