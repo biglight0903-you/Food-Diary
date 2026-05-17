@@ -1,19 +1,19 @@
-// ===== タブ切り替え =====
+/* =========================
+   タブ切り替え
+========================= */
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".tab-btn")
-      .forEach((b) => b.classList.remove("active"));
-    document
-      .querySelectorAll(".tab-content")
-      .forEach((c) => c.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach((c) => c.classList.remove("active"));
 
     btn.classList.add("active");
     document.getElementById(btn.dataset.tab).classList.add("active");
   });
 });
 
-// ===== ログ保存用ユーティリティ =====
+/* =========================
+   ログ保存ユーティリティ
+========================= */
 function getTodayKey() {
   return new Date().toISOString().split("T")[0];
 }
@@ -26,7 +26,9 @@ function saveLogs(logs) {
   localStorage.setItem("logs", JSON.stringify(logs));
 }
 
-// ===== 設定保存 =====
+/* =========================
+   設定保存
+========================= */
 function loadSettings() {
   return JSON.parse(
     localStorage.getItem("settings") ||
@@ -41,7 +43,9 @@ function saveSettings(settings) {
   localStorage.setItem("settings", JSON.stringify(settings));
 }
 
-// ===== 初期ダミーデータ（UI確認用） =====
+/* =========================
+   初期ダミーデータ
+========================= */
 (function seedIfEmpty() {
   const logs = loadLogs();
   const today = getTodayKey();
@@ -59,7 +63,9 @@ function saveSettings(settings) {
   }
 })();
 
-// ===== ログ追加・削除 =====
+/* =========================
+   ログ追加・削除
+========================= */
 function addLog(text) {
   const logs = loadLogs();
   const today = getTodayKey();
@@ -84,7 +90,9 @@ function deleteLog(index) {
   renderReports();
 }
 
-// ===== 入力UI（カテゴリ＋行動ログ） =====
+/* =========================
+   入力UI（カテゴリ＋行動ログ）
+========================= */
 let activityState = {
   watching: false,
   watchId: null,
@@ -109,11 +117,12 @@ function renderLogInput() {
         <button class="catbtn" data-cat="徒歩">徒歩</button>
         <button class="catbtn" data-cat="ラン">ラン</button>
       </div>
+
       <textarea id="logText" placeholder="自由入力"></textarea>
       <button id="addLogBtn" class="primary-btn">＋ 追加</button>
 
       <div class="activity-block">
-        <div class="activity-label">行動ログ（GPS距離計測・徒歩/ラン用）</div>
+        <div class="activity-label">行動ログ（GPS距離計測）</div>
         <div class="activity-row">
           <button id="activityStartBtn" class="primary-btn">距離計測開始</button>
           <button id="activityStopBtn" class="primary-btn" disabled>停止してログに追加</button>
@@ -126,7 +135,7 @@ function renderLogInput() {
     </div>
   `;
 
-  // カテゴリーボタン
+  /* カテゴリーボタン */
   document.querySelectorAll(".catbtn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const cat = btn.dataset.cat;
@@ -136,22 +145,21 @@ function renderLogInput() {
     });
   });
 
-  // テキスト追加
+  /* テキスト追加 */
   document.getElementById("addLogBtn").addEventListener("click", () => {
     const text = document.getElementById("logText").value.trim();
     if (text) addLog(text);
     document.getElementById("logText").value = "";
   });
 
-  // 行動ログ（GPS）
-  document
-    .getElementById("activityStartBtn")
-    .addEventListener("click", startActivityTracking);
-  document
-    .getElementById("activityStopBtn")
-    .addEventListener("click", stopActivityTracking);
+  /* 行動ログ（GPS） */
+  document.getElementById("activityStartBtn").addEventListener("click", startActivityTracking);
+  document.getElementById("activityStopBtn").addEventListener("click", stopActivityTracking);
 }
 
+/* =========================
+   ログ一覧
+========================= */
 function renderLogList() {
   const list = document.getElementById("logList");
   const logs = loadLogs()[getTodayKey()] || [];
@@ -175,34 +183,33 @@ function renderLogList() {
   `;
 }
 
-// ===== 行動ログ：GPS距離計測 =====
+/* =========================
+   GPS距離計測
+========================= */
 function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
+  const R = 6371;
   const toRad = (d) => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) *
       Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+      Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
 function updateActivityDisplay() {
-  const distEl = document.getElementById("activityDistance");
-  const stepsEl = document.getElementById("activitySteps");
   const km = activityState.distanceKm;
-  const steps = Math.round(km * 1300); // 仮の歩幅
-  distEl.textContent = km.toFixed(2);
-  stepsEl.textContent = steps;
+  const steps = Math.round(km * 1300);
+  document.getElementById("activityDistance").textContent = km.toFixed(2);
+  document.getElementById("activitySteps").textContent = steps;
 }
 
 function startActivityTracking() {
   if (!navigator.geolocation) {
-    alert("このブラウザでは位置情報が使えません");
+    alert("位置情報が使えません");
     return;
   }
   if (activityState.watching) return;
@@ -211,10 +218,8 @@ function startActivityTracking() {
   activityState.distanceKm = 0;
   activityState.lastPos = null;
 
-  const startBtn = document.getElementById("activityStartBtn");
-  const stopBtn = document.getElementById("activityStopBtn");
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
+  document.getElementById("activityStartBtn").disabled = true;
+  document.getElementById("activityStopBtn").disabled = false;
 
   activityState.watchId = navigator.geolocation.watchPosition(
     (pos) => {
@@ -231,21 +236,17 @@ function startActivityTracking() {
       activityState.lastPos = { lat: latitude, lon: longitude };
       updateActivityDisplay();
     },
-    () => {
-      alert("位置情報の取得に失敗しました");
-    },
+    () => alert("位置情報の取得に失敗しました"),
     { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
   );
 }
 
 function stopActivityTracking() {
   if (!activityState.watching) return;
-  activityState.watching = false;
 
-  const startBtn = document.getElementById("activityStartBtn");
-  const stopBtn = document.getElementById("activityStopBtn");
-  startBtn.disabled = false;
-  stopBtn.disabled = true;
+  activityState.watching = false;
+  document.getElementById("activityStartBtn").disabled = false;
+  document.getElementById("activityStopBtn").disabled = true;
 
   if (activityState.watchId != null) {
     navigator.geolocation.clearWatch(activityState.watchId);
@@ -257,12 +258,15 @@ function stopActivityTracking() {
     const steps = Math.round(km * 1300);
     addLog(`徒歩 ${km.toFixed(2)}km（推定 ${steps}歩）`);
   }
+
   activityState.distanceKm = 0;
   activityState.lastPos = null;
   updateActivityDisplay();
 }
 
-// ===== ダッシュボード（AIっぽい簡易解析） =====
+/* =========================
+   今日の解析（AIっぽいロジック）
+========================= */
 function analyzeToday() {
   const logs = loadLogs()[getTodayKey()] || [];
   let water = 0;
@@ -277,6 +281,7 @@ function analyzeToday() {
     if (t.includes("コーヒー")) coffee += 1;
     if (t.includes("プロテイン")) protein += 1;
     if (t.includes("食事") && l.time >= "22:00") lateMeal = true;
+
     if (t.includes("徒歩")) {
       const m = t.match(/([\d.]+)km/);
       if (m) walkKm += parseFloat(m[1]);
@@ -286,6 +291,9 @@ function analyzeToday() {
   return { water, coffee, protein, lateMeal, walkKm };
 }
 
+/* =========================
+   Dashboard 表示
+========================= */
 function renderDashboard() {
   const todayEl = document.getElementById("dashboardToday");
   const trendEl = document.getElementById("dashboardTrends");
@@ -294,21 +302,17 @@ function renderDashboard() {
   const targetWater = settings.targetWater || 1500;
 
   const improvements = [];
-  if (water < targetWater)
-    improvements.push(`水分が少なめです（目安 ${targetWater}ml）`);
+  if (water < targetWater) improvements.push(`水分が少なめです（目安 ${targetWater}ml）`);
   if (coffee > 3) improvements.push("カフェインが多めです（3杯まで推奨）");
   if (protein < 2) improvements.push("タンパク質が少なめです（1日2回が目安）");
   if (lateMeal) improvements.push("22時以降の食事があります（翌日の眠気リスク）");
   if (walkKm < 3) improvements.push("徒歩距離が少なめです（3km以上が目安）");
 
-  // 明日の予測（ざっくり）
   let headacheRisk = "低";
   let sleepiness = "普通";
   let focus = "安定";
 
-  if (water < targetWater * 0.7) {
-    headacheRisk = "中";
-  }
+  if (water < targetWater * 0.7) headacheRisk = "中";
   if (lateMeal || coffee > 3) {
     sleepiness = "高";
     focus = "やや低下";
@@ -322,6 +326,7 @@ function renderDashboard() {
       <div>プロテイン：${protein} 回</div>
       <div>徒歩距離：${walkKm.toFixed(2)} km</div>
       <div>深夜食：${lateMeal ? "あり" : "なし"}</div>
+
       <div style="margin-top:8px; font-weight:600;">改善ポイント</div>
       <ul>
         ${
@@ -330,6 +335,7 @@ function renderDashboard() {
             : "<li>特に大きな問題はありません</li>"
         }
       </ul>
+
       <div style="margin-top:8px; font-weight:600;">明日の予測</div>
       <ul>
         <li>頭痛リスク：${headacheRisk}</li>
@@ -340,6 +346,7 @@ function renderDashboard() {
   `;
 
   const trends = analyzeTrends();
+
   trendEl.innerHTML = `
     <div class="dash-block">
       <div class="dash-title">簡易トレンド（過去7日）</div>
@@ -351,11 +358,14 @@ function renderDashboard() {
   `;
 }
 
-// ===== トレンド解析（過去7日） =====
+/* =========================
+   トレンド解析（過去7日）
+========================= */
 function analyzeTrends() {
   const logs = loadLogs();
   const dates = Object.keys(logs).sort();
   const last7 = dates.slice(-7);
+
   let totalWater = 0;
   let totalCoffee = 0;
   let totalWalkKm = 0;
@@ -372,10 +382,12 @@ function analyzeTrends() {
       const t = l.text;
       if (t.includes("水")) water += 200;
       if (t.includes("コーヒー")) coffee += 1;
+
       if (t.includes("徒歩")) {
         const m = t.match(/([\d.]+)km/);
         if (m) walkKm += parseFloat(m[1]);
       }
+
       if (t.includes("食事") && l.time >= "22:00") late = true;
     });
 
@@ -386,6 +398,7 @@ function analyzeTrends() {
   });
 
   const days = last7.length || 1;
+
   return {
     days,
     avgWater: totalWater / days,
@@ -395,7 +408,9 @@ function analyzeTrends() {
   };
 }
 
-// ===== レポート（週・月・年の簡易集計） =====
+/* =========================
+   期間別集計（週・月・年）
+========================= */
 function getPeriodStats(period) {
   const logs = loadLogs();
   const now = new Date();
@@ -421,24 +436,31 @@ function getPeriodStats(period) {
   Object.keys(logs).forEach((dateStr) => {
     const d = new Date(dateStr + "T00:00:00");
     if (d < startDate || d > now) return;
+
     daysCount += 1;
     const dayLogs = logs[dateStr];
     let dayLate = false;
+
     dayLogs.forEach((l) => {
       const t = l.text;
+
       if (t.includes("水")) water += 200;
       if (t.includes("コーヒー")) coffee += 1;
       if (t.includes("プロテイン")) protein += 1;
+
       if (t.includes("徒歩")) {
         const m = t.match(/([\d.]+)km/);
         if (m) walkKm += parseFloat(m[1]);
       }
+
       if (t.includes("食事") && l.time >= "22:00") dayLate = true;
     });
+
     if (dayLate) lateMealDays += 1;
   });
 
   daysCount = daysCount || 1;
+
   return {
     days: daysCount,
     avgWater: water / daysCount,
@@ -449,6 +471,9 @@ function getPeriodStats(period) {
   };
 }
 
+/* =========================
+   レポート描画
+========================= */
 function renderReports() {
   const week = getPeriodStats("week");
   const month = getPeriodStats("month");
@@ -491,237 +516,162 @@ function renderReports() {
   `;
 }
 
-// ===== Guide（v9.2ベース強化版） =====
+/* =========================
+   Guide（完全統合版 v10.0）
+========================= */
 function renderGuide() {
   const g = document.getElementById("guideContent");
+
   g.innerHTML = `
     <div class="dash-block">
-      <div class="dash-title">Guide（生活プロトコル）</div>
+      <div class="dash-title">Guide（完全統合版 v10.0）</div>
 
-      <h2>1. 朝（Morning）</h2>
-      <p>目的：代謝UP・水分補給・栄養の底上げ・集中力の立ち上げ。</p>
-      <ul>
-        <li>水 200ml</li>
-        <li>マルチビタミン（朝食後）</li>
-        <li>ビタミンD3（脂質と一緒）</li>
-        <li>オメガ3（朝 or 昼）</li>
-        <li>コーヒー 1杯</li>
-        <li>必要な日だけプロテイン</li>
-      </ul>
-      <h3>プロテイン（朝）のメリット</h3>
-      <ul>
-        <li>血糖値が安定しやすい</li>
-        <li>集中力が落ちにくい</li>
-        <li>空腹感のコントロール</li>
-      </ul>
-      <h3>デメリット</h3>
-      <ul>
-        <li>胃が弱い日は重く感じる</li>
-        <li>飲みすぎると昼の食欲が落ちる</li>
-      </ul>
+      <h2>1. コア思想（SYSTEM PHILOSOPHY）</h2>
+      <div class="box box-info">
+        <div>・迷ったらプロテインを選択する。</div>
+        <div>・夜は糖質を入れず、睡眠中の脂肪燃焼を妨げない。</div>
+        <div>・炎症を抑えることで、減量スピードと体調を両立させる。</div>
+        <div>・睡眠の質が、翌日の食欲・代謝・意思決定を左右する。</div>
+        <div>・例外処理（外食・酒・食べすぎ）をあらかじめ設計しておく。</div>
+      </div>
 
-      <h2>2. 昼（Lunch）</h2>
-      <p>目的：エネルギー補給・タンパク質確保・午後の集中力維持。</p>
-      <ul>
-        <li>タンパク質 1回</li>
-        <li>水 200〜400ml</li>
-        <li>オメガ3（朝に飲まなかった場合）</li>
-        <li>サイリウム（食前）</li>
-      </ul>
+      <h2>2. サプリメント運用（タイミング＋メリット/デメリット）</h2>
 
-      <h2>3. 夜（Dinner）</h2>
-      <p>目的：回復・睡眠の質UP・翌日の体調を整える。</p>
-      <ul>
-        <li>タンパク質 1回</li>
-        <li>水 200ml</li>
-        <li>サイリウム（必要な日）</li>
-        <li>亜鉛（夕食後）</li>
-      </ul>
-      <p>22時以降は軽食（ヨーグルト・プロテイン）に寄せる。</p>
+      <div class="grid-2">
 
-      <h2>4. 就寝前</h2>
-      <ul>
-        <li>マグネシウム（寝る1時間前）</li>
-        <li>水 100ml</li>
-      </ul>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">朝（朝食後）</span>
+            <span class="tag">代謝スイッチ</span>
+          </div>
+          <ul class="param-list">
+            <li><strong>ビタミンD3</strong>：免疫・メンタル安定／脂溶性なので食後</li>
+            <li><strong>マルチビタミン</strong>：栄養の底上げ／空腹時は胃が荒れる</li>
+          </ul>
+        </div>
 
-      <h2>5. サプリメント（メリット・デメリット）</h2>
-      <h3>マルチビタミン</h3>
-      <ul>
-        <li>朝食後</li>
-        <li>栄養の底上げ・疲労軽減</li>
-        <li>空腹時は胃が荒れやすい</li>
-      </ul>
-      <h3>ビタミンD3</h3>
-      <ul>
-        <li>朝食後（脂質と一緒）</li>
-        <li>免疫力UP・メンタル安定</li>
-        <li>過剰摂取はNG</li>
-      </ul>
-      <h3>オメガ3</h3>
-      <ul>
-        <li>朝 or 昼の食後</li>
-        <li>炎症抑制・集中力UP・血流改善</li>
-        <li>空腹時はムカつくことがある</li>
-      </ul>
-      <h3>マグネシウム</h3>
-      <ul>
-        <li>寝る1時間前</li>
-        <li>睡眠の質UP・筋肉の緊張緩和</li>
-        <li>多すぎるとお腹がゆるくなる</li>
-      </ul>
-      <h3>亜鉛</h3>
-      <ul>
-        <li>夕食後</li>
-        <li>男性ホルモン維持・免疫力UP</li>
-        <li>空腹時は吐き気が出やすい</li>
-      </ul>
-      <h3>サイリウム</h3>
-      <ul>
-        <li>食前（昼 or 夜）</li>
-        <li>血糖値安定・腹持ちUP</li>
-        <li>水分不足だと逆に便秘</li>
-      </ul>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">昼（昼食後）</span>
+            <span class="tag">炎症コントロール 前半</span>
+          </div>
+          <ul class="param-list">
+            <li><strong>オメガ3</strong>：炎症抑制・集中力UP／空腹時はムカつく</li>
+          </ul>
+        </div>
 
-      <h2>6. プロテイン</h2>
-      <ul>
-        <li>朝 or 運動後</li>
-        <li>筋肉維持・空腹感コントロール</li>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">夜（夕食後）</span>
+            <span class="tag">回復 × 炎症コントロール 後半</span>
+          </div>
+          <ul class="param-list">
+            <li><strong>オメガ3</strong>：昼と分割で血中濃度安定</li>
+            <li><strong>亜鉛</strong>：男性ホルモン維持／空腹時は吐き気</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">就寝90分前</span>
+            <span class="tag">睡眠プロトコル</span>
+          </div>
+          <ul class="param-list">
+            <li><strong>マグネシウム</strong>：睡眠の質UP／多いとお腹がゆるい</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <h3>プロテイン（メリット/デメリット）</h3>
+      <ul class="param-list">
+        <li>血糖値が安定し、集中力が落ちにくい</li>
+        <li>空腹感のコントロールに最適</li>
         <li>飲みすぎると胃が重い</li>
       </ul>
 
-      <h2>7. 行動ルール</h2>
-      <ul>
-        <li>水分：1日 1200〜1800ml（18時に200ml）</li>
-        <li>タンパク質：1日 2回</li>
-        <li>23時以降の食事は翌日の眠気リスクUP</li>
-        <li>01時以降は「深夜作業扱い」</li>
-      </ul>
+      <h2>3. 1日の運用スケジュール（バッチ処理）</h2>
 
-      <h2>8. 例外処理</h2>
-      <h3>ジャンクフードを食べた翌日</h3>
-      <ul>
-        <li>水 2L</li>
-        <li>サイリウム</li>
-        <li>タンパク質多め</li>
-        <li>10,000歩</li>
-      </ul>
-      <h3>飲み会の翌日</h3>
-      <ul>
-        <li>水 2L</li>
-        <li>野菜多め</li>
-        <li>プロテイン</li>
-        <li>早めの就寝</li>
-      </ul>
-    </div>
-  `;
-}
+      <table>
+        <tr><th>タイミング</th><th>実行内容</th><th>ポイント</th></tr>
 
-// ===== 設定：通知・バックアップ・復元 =====
-let notifyTimer = null;
+        <tr>
+          <td class="time-col">Morning</td>
+          <td>卵2個＋納豆＋味噌汁＋プロテイン半スクープ<br>＋ D3＋マルチ（食後）</td>
+          <td>代謝スイッチ＋血糖値安定</td>
+        </tr>
 
-function setupSettings() {
-  const settings = loadSettings();
-  const notify18 = document.getElementById("notify18");
-  const targetWater = document.getElementById("targetWater");
-  const backupBtn = document.getElementById("backupBtn");
-  const restoreBtn = document.getElementById("restoreBtn");
-  const restoreFile = document.getElementById("restoreFile");
+        <tr>
+          <td class="time-col">Lunch</td>
+          <td>鶏むね肉＋野菜＋白米100〜150g＋オメガ3</td>
+          <td>集中力維持・炎症コントロール</td>
+        </tr>
 
-  notify18.checked = settings.notify18;
-  targetWater.value = settings.targetWater;
+        <tr>
+          <td class="time-col">Night</td>
+          <td>プロテイン＋サイリウム＋オメガ3＋亜鉛</td>
+          <td>夜は糖質禁止／睡眠の質を最優先</td>
+        </tr>
 
-  notify18.addEventListener("change", () => {
-    const s = loadSettings();
-    s.notify18 = notify18.checked;
-    saveSettings(s);
-    setupNotifyTimer();
-  });
+        <tr>
+          <td class="time-col">Sleep 90min Before</td>
+          <td>スマホOFF・ぬるめのシャワー・Mg</td>
+          <td>翌日の食欲・代謝・メンタルが安定</td>
+        </tr>
+      </table>
 
-  targetWater.addEventListener("change", () => {
-    const s = loadSettings();
-    s.targetWater = Number(targetWater.value) || 1500;
-    saveSettings(s);
-    renderDashboard();
-  });
+      <h2>4. 許可食品リスト（優先度付き）</h2>
 
-  backupBtn.addEventListener("click", () => {
-    const data = {
-      logs: loadLogs(),
-      settings: loadSettings()
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `food-diary-backup-${getTodayKey()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
+      <div class="grid-3">
 
-  restoreBtn.addEventListener("click", () => {
-    const file = restoreFile.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (data.logs) localStorage.setItem("logs", JSON.stringify(data.logs));
-        if (data.settings) saveSettings(data.settings);
-        renderLogList();
-        renderDashboard();
-        renderReports();
-        setupSettings();
-        setupNotifyTimer();
-        alert("復元しました");
-      } catch (err) {
-        alert("復元に失敗しました");
-      }
-    };
-    reader.readAsText(file);
-  });
-}
+        <div class="card">
+          <div class="card-title">最優先：タンパク質</div>
+          <p class="desc">卵／納豆／豆腐／鶏むね肉／ヨーグルト</p>
+        </div>
 
-// 18:00 通知（簡易版）
-function setupNotifyTimer() {
-  if (notifyTimer) {
-    clearInterval(notifyTimer);
-    notifyTimer = null;
-  }
-  const settings = loadSettings();
-  if (!settings.notify18) return;
+        <div class="card">
+          <div class="card-title">補助：整える食品</div>
+          <p class="desc">味噌汁／野菜／海藻／きのこ／キムチ</p>
+        </div>
 
-  notifyTimer = setInterval(() => {
-    const now = new Date();
-    const h = now.getHours();
-    const m = now.getMinutes();
-    if (h === 18 && m === 0) {
-      alert("水 200ml を飲む時間です");
-    }
-  }, 60000);
-}
+        <div class="card">
+          <div class="card-title">制限付き：タイミング限定</div>
+          <p class="desc">白米（昼のみ）／フルーツ（朝のみ）／夜の糖質は禁止</p>
+        </div>
 
-// ===== 初期化 =====
-function init() {
-  renderLogInput();
-  renderLogList();
-  renderDashboard();
-  renderReports();
-  renderGuide();
-  setupSettings();
-  setupNotifyTimer();
-}
+      </div>
 
-function renderGuide() {
-  const g = document.getElementById("guideContent");
+      <h2>5. 食事テンプレート</h2>
 
-  g.innerHTML = `
-    ${/* ここに前回作った「Guide 完全統合版 HTML」をそのまま入れる */""}
+      <table>
+        <tr><th>タイミング</th><th>メニュー構成</th></tr>
+        <tr><td class="time-col">朝</td><td>卵＋納豆＋味噌汁＋プロテイン</td></tr>
+        <tr><td class="time-col">昼</td><td>鶏むね肉＋野菜＋白米</td></tr>
+        <tr><td class="time-col">夜</td><td>プロテイン＋サイリウム</td></tr>
+        <tr><td class="time-col">間食</td><td>ゆで卵 or ヨーグルト</td></tr>
+      </table>
+
+      <h2>6. 例外処理プロトコル</h2>
+
+      <div class="box box-warning">
+        <strong>食べすぎた場合</strong><br>
+        ・翌日で調整（断食はしない）<br>
+        ・タンパク質と水を優先
+      </div>
+
+      <div class="box box-warning">
+        <strong>外食・酒</strong><br>
+        ・酒は蒸留酒＋水同量<br>
+        ・翌日：納豆2P＋水3L
+      </div>
+
+      <div class="box box-warning">
+        <strong>歩けない日</strong><br>
+        ・階段優先／1駅手前で降りる<br>
+        ・無理なら 1分HIIT
+      </div>
   `;
 
-  // ハイライト処理
   const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム", "プロテイン"];
   g.innerHTML = g.innerHTML.replace(
     new RegExp(words.join("|"), "g"),
@@ -729,4 +679,209 @@ function renderGuide() {
   );
 }
 
-init();
+g.innerHTML += `
+      <h2>7. 期待される変化（KPI）</h2>
+
+      <table>
+        <tr><th>期間</th><th>変化</th></tr>
+        <tr><td class="time-col">3日</td><td>間食欲求が減る</td></tr>
+        <tr><td class="time-col">1週間</td><td>暴食が減る</td></tr>
+        <tr><td class="time-col">2週間</td><td>体重・体脂肪が減り始める</td></tr>
+        <tr><td class="time-col">1ヶ月</td><td>ルーチンが自動化</td></tr>
+      </table>
+
+      <h2>8. 摂取量パラメータ</h2>
+
+      <div class="grid-2">
+
+        <div class="card">
+          <div class="card-title">プロテイン</div>
+          <ul class="param-list">
+            <li>1回：30g</li>
+            <li>夜置換：1〜2回</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">サイリウム</div>
+          <ul class="param-list">
+            <li>3〜5g</li>
+            <li>水300〜400ml</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">食品パラメータ</div>
+          <ul class="param-list">
+            <li>卵：2〜4個</li>
+            <li>納豆：1P</li>
+            <li>豆腐：150〜300g</li>
+            <li>白米：昼のみ100〜150g</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">サプリ規定量</div>
+          <ul class="param-list">
+            <li>D3：5000IU</li>
+            <li>マルチ：1〜2粒</li>
+            <li>オメガ3：1〜2粒 × 2回</li>
+            <li>亜鉛：15〜30mg</li>
+            <li>Mg：200〜400mg</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <h2>9. クリティカルルール</h2>
+
+      <div class="box box-danger">
+        <div>・夜の糖質は禁止</div>
+        <div>・空腹は水 or タンパク質で処理</div>
+        <div>・迷ったらプロテイン</div>
+        <div>・完璧より継続</div>
+      </div>
+
+      <h2>10. 可変プロトコル（A/Bパターン）</h2>
+
+      <div class="grid-2">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">A：前夜しっかり食べた翌日</span>
+            <span class="tag">朝は軽く</span>
+          </div>
+          <ul class="param-list">
+            <li>プロテイン10〜15g</li>
+            <li>D3＋マルチ</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">B：前夜が軽かった翌日</span>
+            <span class="tag">朝はしっかり</span>
+          </div>
+          <ul class="param-list">
+            <li>卵2＋納豆＋味噌汁＋プロテイン</li>
+            <li>D3＋マルチ</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <h2>11. 昼〜夜の共通ルール</h2>
+
+      <table>
+        <tr><th>タイミング</th><th>食事</th><th>サプリ</th><th>ポイント</th></tr>
+
+        <tr>
+          <td class="time-col">昼</td>
+          <td>鶏むね肉＋野菜＋白米100g</td>
+          <td>オメガ3</td>
+          <td>遅い昼は軽く</td>
+        </tr>
+
+        <tr>
+          <td class="time-col">夜10時前後</td>
+          <td>ヨーグルト／卵／豆腐／プロテイン</td>
+          <td>オメガ3＋亜鉛</td>
+          <td>糖質禁止</td>
+        </tr>
+
+        <tr>
+          <td class="time-col">就寝90分前</td>
+          <td>スマホOFF・シャワー</td>
+          <td>Mg</td>
+          <td>睡眠の深さを確保</td>
+        </tr>
+
+      </table>
+    </div>
+  `;
+
+  const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム", "プロテイン"];
+  g.innerHTML = g.innerHTML.replace(
+    new RegExp(words.join("|"), "g"),
+    (match) => `<span class="highlight">${match}</span>`
+  );
+}
+
+/* =========================
+   設定（通知・水分目標）
+========================= */
+function renderSettings() {
+  const settings = loadSettings();
+
+  document.getElementById("notify18").checked = settings.notify18;
+  document.getElementById("targetWater").value = settings.targetWater;
+
+  document.getElementById("notify18").addEventListener("change", (e) => {
+    settings.notify18 = e.target.checked;
+    saveSettings(settings);
+  });
+
+  document.getElementById("targetWater").addEventListener("input", (e) => {
+    settings.targetWater = Number(e.target.value);
+    saveSettings(settings);
+    renderDashboard();
+  });
+
+  document.getElementById("backupBtn").addEventListener("click", () => {
+    const data = {
+      logs: loadLogs(),
+      settings: loadSettings()
+    };
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "food_diary_backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("restoreBtn").addEventListener("click", () => {
+    const fileInput = document.getElementById("restoreFile");
+    if (!fileInput.files.length) {
+      alert("ファイルを選択してください");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (data.logs) localStorage.setItem("logs", JSON.stringify(data.logs));
+        if (data.settings) localStorage.setItem("settings", JSON.stringify(data.settings));
+
+        alert("復元が完了しました");
+        renderAll();
+      } catch {
+        alert("復元に失敗しました（ファイル形式エラー）");
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+/* =========================
+   全体レンダリング
+========================= */
+function renderAll() {
+  renderLogInput();
+  renderLogList();
+  renderDashboard();
+  renderReports();
+  renderGuide();
+  renderSettings();
+}
+
+/* =========================
+   初期化
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  renderAll();
+});
