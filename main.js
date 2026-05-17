@@ -1,6 +1,25 @@
-/* ------------------------------
-   タブ切り替え
------------------------------- */
+/* =========================
+   Part0: 初期データ
+========================= */
+
+let logs = JSON.parse(localStorage.getItem("logs") || "[]");
+let settings = JSON.parse(localStorage.getItem("settings") || "{}");
+
+function saveLogs() {
+  localStorage.setItem("logs", JSON.stringify(logs));
+}
+function saveSettings() {
+  localStorage.setItem("settings", JSON.stringify(settings));
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/* =========================
+   Part1: タブ切り替え
+========================= */
+
 document.querySelectorAll(".tab-button").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
@@ -9,220 +28,244 @@ document.querySelectorAll(".tab-button").forEach(btn => {
     btn.classList.add("active");
     document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
 
+    if (btn.dataset.tab === "dashboard") renderDashboard();
+    if (btn.dataset.tab === "report") renderReport();
     if (btn.dataset.tab === "guide") renderGuide();
   });
 });
 
-/* ------------------------------
-   ログ管理
------------------------------- */
-let logs = JSON.parse(localStorage.getItem("dailyLogs") || "[]");
-let historyList = JSON.parse(localStorage.getItem("historyList") || "[]");
-let selectedCategories = [];
+/* =========================
+   Part2: ログ追加
+========================= */
 
-/* ------------------------------
-   固有名詞ボタン（即時記録）
------------------------------- */
-function quickAdd(text) {
-  const now = new Date().toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  logs.push({ time: now, text });
-  localStorage.setItem("dailyLogs", JSON.stringify(logs));
-  renderLogs();
-}
-
-/* ------------------------------
-   カテゴリ選択（複数選択）
------------------------------- */
-function toggleCategory(btn, cat) {
-  btn.classList.toggle("selected");
-
-  if (selectedCategories.includes(cat)) {
-    selectedCategories = selectedCategories.filter(c => c !== cat);
-  } else {
-    selectedCategories.push(cat);
-  }
-}
-
-/* ------------------------------
-   記録追加（カテゴリ＋テキスト）
------------------------------- */
-function addLog() {
+document.getElementById("addLogBtn").addEventListener("click", () => {
   const text = document.getElementById("textInput").value.trim();
   if (!text) return;
 
-  const now = new Date().toLocaleTimeString("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit"
+  const time = new Date().toISOString();
+
+  logs.push({
+    time,
+    text
   });
 
-  const fullText = `${selectedCategories.join(" / ")}：${text}`;
-
-  logs.push({ time: now, text: fullText });
-  localStorage.setItem("dailyLogs", JSON.stringify(logs));
-
-  if (!historyList.includes(text)) {
-    historyList.push(text);
-    localStorage.setItem("historyList", JSON.stringify(historyList));
-  }
-
+  saveLogs();
   document.getElementById("textInput").value = "";
-  selectedCategories = [];
-  document.querySelectorAll("#categoryButtons .btn").forEach(btn =>
-    btn.classList.remove("selected")
-  );
+  renderLogList();
+});
 
-  renderLogs();
-}
+/* =========================
+   Part3: ログ表示
+========================= */
 
-/* ------------------------------
-   履歴候補
------------------------------- */
-function showSuggestions() {
-  const box = document.getElementById("suggestionBox");
-  box.innerHTML = historyList
-    .map(item => `<div class="suggestion-item" onclick="selectSuggestion('${item}')">${item}</div>`)
-    .join("");
-  box.style.display = "block";
-}
-
-function filterSuggestions() {
-  const input = document.getElementById("textInput").value;
-  const box = document.getElementById("suggestionBox");
-
-  box.innerHTML = historyList
-    .filter(item => item.includes(input))
-    .map(item => `<div class="suggestion-item" onclick="selectSuggestion('${item}')">${item}</div>`)
-    .join("");
-}
-
-function selectSuggestion(text) {
-  document.getElementById("textInput").value = text;
-  document.getElementById("suggestionBox").style.display = "none";
-}
-
-/* ------------------------------
-   記録表示（削除ボタン付き）
------------------------------- */
-function renderLogs() {
+function renderLogList() {
   const list = document.getElementById("logList");
   list.innerHTML = logs
-    .map(
-      (l, index) => `
-      <li class="log-item">
-        <span class="log-text">${l.time}：${l.text}</span>
-        <button class="log-delete-btn" onclick="deleteLog(${index})">削除</button>
-      </li>
-    `
-    )
+    .map((l, i) => {
+      const t = new Date(l.time);
+      const hh = String(t.getHours()).padStart(2, "0");
+      const mm = String(t.getMinutes()).padStart(2, "0");
+      return `
+        <div class="log-item-row">
+          <div class="log-main">${hh}:${mm}｜${l.text}</div>
+          <button class="log-delete-btn" onclick="deleteLog(${i})">削除</button>
+        </div>
+      `;
+    })
     .join("");
 }
-renderLogs();
+renderLogList();
 
-function deleteLog(index) {
-  logs.splice(index, 1);
-  localStorage.setItem("dailyLogs", JSON.stringify(logs));
-  renderLogs();
+function deleteLog(i) {
+  logs.splice(i, 1);
+  saveLogs();
+  renderLogList();
 }
 
-/* ------------------------------
-   全削除
------------------------------- */
-function clearAllLogs() {
-  if (!confirm("本当に削除しますか？")) return;
+/* =========================
+   Part4: Dashboard
+========================= */
 
-  logs = [];
-  localStorage.setItem("dailyLogs", JSON.stringify(logs));
-  renderLogs();
-}
+function renderDashboard() {
+  const box = document.getElementById("dashboardContent");
 
-/* ------------------------------
-   AI解析（元の簡易版）
------------------------------- */
-function analyzeLogs() {
-  let text = logs.map(l => l.text).join(" / ");
-  let advice = "";
+  let water = 0;
+  let coffee = 0;
 
-  if (!text.includes("マルチ")) advice += "・マルチビタミンが未記録です。<br>";
-  if (!text.includes("D3")) advice += "・ビタミンD3が未記録です。<br>";
-  if (!text.includes("オメガ3")) advice += "・オメガ3が不足気味です。<br>";
-  if (!text.includes("マグネ")) advice += "・マグネシウムがない日 → 睡眠の質が落ちやすいです。<br>";
+  logs.forEach(l => {
+    if (l.text.includes("水")) {
+      const m = l.text.match(/(\d+)ml/);
+      if (m) water += Number(m[1]);
+    }
+    if (l.text.includes("コーヒー")) coffee++;
+  });
 
-  if (text.includes("ジャンク")) advice += "・ジャンクを食べた日は翌朝軽め＋水多めが最適です。<br>";
+  box.innerHTML = `
+    <div class="dashboard-card">
+      <div class="dashboard-label">水分摂取</div>
+      <div class="dashboard-value">${water} ml</div>
+    </div>
 
-  if (advice === "") advice = "今日の運用はとても良いバランスです。";
-
-  const box = document.getElementById("analysisResult");
-  box.innerHTML = advice;
-  box.style.display = "block";
-}
-
-/* ------------------------------
-   Guide（元のまま）
------------------------------- */
-function renderGuide() {
-  document.getElementById("guideContent").innerHTML = `
-    <p>※ この Process Guide は、祐一の生活リズム・食事傾向・例外処理・サプリ運用を統合した最新版。</p>
-
-    <h3>■ 朝の運用</h3>
-    <ul>
-      <li>朝食は「軽め or しっかり」を前日の夜で調整</li>
-      <li>朝しっかり食べた日は昼を軽くする</li>
-      <li>朝軽い日は昼をしっかり食べる</li>
-      <li>朝のカフェインは 9:00 以降が理想</li>
-    </ul>
-
-    <h3>■ 昼の運用</h3>
-    <ul>
-      <li>昼が遅い日は夜を軽くする</li>
-      <li>昼に糖質が多い日は夜を控えめに</li>
-    </ul>
-
-    <h3>■ 夜の運用</h3>
-    <ul>
-      <li>夜しっかり食べた日は翌朝軽くする</li>
-      <li>夜遅食は翌朝の糖質を控えめに</li>
-      <li>ジャンク後は「水多め＋朝軽め＋昼しっかり」</li>
-    </ul>
-
-    <h3>■ サプリ運用</h3>
-    <ul>
-      <li>マルチビタミン：朝 or 昼</li>
-      <li>ビタミンD3：朝</li>
-      <li>オメガ3：夜 or 食後</li>
-      <li>亜鉛：夜</li>
-      <li>マグネシウム：寝る前</li>
-      <li>サイリウム：食前</li>
-    </ul>
-
-    <h3>■ 例外処理</h3>
-    <ul>
-      <li>外食 → 翌朝軽め</li>
-      <li>酒 → 水多め＋マグネシウム</li>
-      <li>ジャンク → 翌朝軽め＋昼しっかり</li>
-    </ul>
-
-    <h3>■ 水分管理</h3>
-    <ul>
-      <li>1日 1〜2L を目安に</li>
-      <li>チマチマ飲むので 50ml 刻みで記録</li>
-    </ul>
-
-    <h3>■ 運動</h3>
-    <ul>
-      <li>HIIT：週 2〜3 回</li>
-      <li>散歩：毎日 20〜30 分</li>
-    </ul>
-
-    <h3>■ 体調管理</h3>
-    <ul>
-      <li>眠気 → カフェイン控えめ</li>
-      <li>胃もたれ → 朝軽め</li>
-      <li>ストレス → 糖質を控えめに</li>
-    </ul>
+    <div class="dashboard-card">
+      <div class="dashboard-label">コーヒー</div>
+      <div class="dashboard-value">${coffee} 杯</div>
+    </div>
   `;
 }
-renderGuide();
+
+/* =========================
+   Part5: Report
+========================= */
+
+function renderReport() {
+  const box = document.getElementById("reportContent");
+
+  const count = {};
+  logs.forEach(l => {
+    const key = l.text.split("：")[0] || "その他";
+    count[key] = (count[key] || 0) + 1;
+  });
+
+  box.innerHTML = `
+    <div class="dashboard-card">
+      <h3>カテゴリ別 回数</h3>
+      <ul>
+        ${Object.entries(count)
+          .map(([k, v]) => `<li>${k}：${v} 回</li>`)
+          .join("")}
+      </ul>
+    </div>
+  `;
+}
+
+/* =========================
+   Part6: Settings / Backup / Restore / Clear / Reset
+========================= */
+
+/* -------------------------
+   設定ロード
+------------------------- */
+function loadSettingsToUI() {
+  document.getElementById("targetWater").value = settings.targetWater || "";
+  document.getElementById("targetSteps").value = settings.targetSteps || "";
+  document.getElementById("coffeeLimit").value = settings.coffeeLimit || "";
+  document.getElementById("lateSnackAlert").checked = settings.lateSnackAlert || false;
+
+  document.getElementById("d3Dose").value = settings.d3Dose || "";
+  document.getElementById("multiDose").value = settings.multiDose || "";
+  document.getElementById("omegaDose").value = settings.omegaDose || "";
+  document.getElementById("zincDose").value = settings.zincDose || "";
+  document.getElementById("mgDose").value = settings.mgDose || "";
+  document.getElementById("proteinDose").value = settings.proteinDose || "";
+
+  document.getElementById("notify18").checked = settings.notify18 || false;
+  document.getElementById("notify21").checked = settings.notify21 || false;
+  document.getElementById("notify22").checked = settings.notify22 || false;
+}
+
+loadSettingsToUI();
+
+/* -------------------------
+   設定変更イベント
+------------------------- */
+document.querySelectorAll("#tab-settings input").forEach(input => {
+  input.addEventListener("change", () => {
+    settings.targetWater = Number(document.getElementById("targetWater").value || 0);
+    settings.targetSteps = Number(document.getElementById("targetSteps").value || 0);
+    settings.coffeeLimit = Number(document.getElementById("coffeeLimit").value || 0);
+    settings.lateSnackAlert = document.getElementById("lateSnackAlert").checked;
+
+    settings.d3Dose = Number(document.getElementById("d3Dose").value || 0);
+    settings.multiDose = Number(document.getElementById("multiDose").value || 0);
+    settings.omegaDose = Number(document.getElementById("omegaDose").value || 0);
+    settings.zincDose = Number(document.getElementById("zincDose").value || 0);
+    settings.mgDose = Number(document.getElementById("mgDose").value || 0);
+    settings.proteinDose = Number(document.getElementById("proteinDose").value || 0);
+
+    settings.notify18 = document.getElementById("notify18").checked;
+    settings.notify21 = document.getElementById("notify21").checked;
+    settings.notify22 = document.getElementById("notify22").checked;
+
+    saveSettings();
+  });
+});
+
+/* -------------------------
+   バックアップ
+------------------------- */
+document.getElementById("backupBtn").addEventListener("click", () => {
+  const data = { logs, settings };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "food-diary-backup.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+/* -------------------------
+   復元
+------------------------- */
+document.getElementById("restoreBtn").addEventListener("click", () => {
+  const fileInput = document.getElementById("restoreFile");
+  if (!fileInput.files.length) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      logs = data.logs || [];
+      settings = data.settings || {};
+      saveLogs();
+      saveSettings();
+      loadSettingsToUI();
+      renderLogList();
+      alert("復元が完了しました");
+    } catch {
+      alert("復元に失敗しました（ファイルが壊れている可能性があります）");
+    }
+  };
+  reader.readAsText(fileInput.files[0]);
+});
+
+/* -------------------------
+   今日のログ削除
+------------------------- */
+document.getElementById("clearTodayBtn").addEventListener("click", () => {
+  const today = todayStr();
+  logs = logs.filter(l => l.time.slice(0, 10) !== today);
+  saveLogs();
+  renderLogList();
+  alert("今日のログを削除しました");
+});
+
+/* -------------------------
+   全期間ログ削除
+------------------------- */
+document.getElementById("clearAllLogsBtn").addEventListener("click", () => {
+  if (!confirm("本当に全期間のログを削除しますか？")) return;
+  logs = [];
+  saveLogs();
+  renderLogList();
+  alert("全期間のログを削除しました");
+});
+
+/* -------------------------
+   アプリ初期化
+------------------------- */
+document.getElementById("resetAppBtn").addEventListener("click", () => {
+  if (!confirm("アプリを完全に初期化しますか？（ログ＋設定）")) return;
+
+  logs = [];
+  settings = {};
+  saveLogs();
+  saveSettings();
+  loadSettingsToUI();
+  renderLogList();
+
+  alert("アプリを初期化しました");
+});
