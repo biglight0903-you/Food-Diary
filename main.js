@@ -714,4 +714,19 @@ function init() {
   setupNotifyTimer();
 }
 
+function renderGuide() {
+  const g = document.getElementById("guideContent");
+
+  g.innerHTML = `
+    ${/* ここに前回作った「Guide 完全統合版 HTML」をそのまま入れる */""}
+  `;
+
+  // ハイライト処理
+  const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム", "プロテイン"];
+  g.innerHTML = g.innerHTML.replace(
+    new RegExp(words.join("|"), "g"),
+    (match) => `<span class="highlight">${match}</span>`
+  );
+}
+
 init();
