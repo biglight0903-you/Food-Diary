@@ -388,4 +388,6 @@ resetAppBtn.addEventListener("click", () => {
 renderLogList();
 renderDashboard();
 renderReport();
-
+function renderGuide() {
+  // iframe表示なので何もしない
+}
