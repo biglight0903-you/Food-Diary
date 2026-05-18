@@ -351,3 +351,21 @@ textarea {
   font-weight: bold;
 }
    
+.log-btn:active,
+.unit-btn:active,
+.tab-button:active,
+.primary-btn:active,
+.secondary-btn:active,
+.danger-btn:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
+.log-btn,
+.unit-btn,
+.tab-button,
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  touch-action: manipulation;
+}
