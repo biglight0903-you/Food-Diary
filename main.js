@@ -52,8 +52,6 @@ let selectedCategory = "";
 let selectedFoodUnit = "";
 let selectedDrinkUnit = "";
 
-
-
 /* =========================
    タブ切り替え
 ========================= */
@@ -113,8 +111,6 @@ document.querySelectorAll(".unit-btn").forEach(btn => {
   btn.addEventListener("touchstart", handler, { passive: false });
   btn.addEventListener("click", handler);
 });
-
-
 
 /* =========================
    ログ追加
