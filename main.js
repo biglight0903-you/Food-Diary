@@ -84,20 +84,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.querySelectorAll(".log-btn").forEach(btn => {
 
-  const handler = () => {
+  const handler = (e) => {
+    e.preventDefault();  // ★ これが無いとスマホで動かない
     document.querySelectorAll(".log-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     selectedCategory = btn.dataset.category || "";
   };
 
+  btn.addEventListener("touchstart", handler, { passive: false });
   btn.addEventListener("click", handler);
-  btn.addEventListener("touchstart", handler);
 });
+
 
 
 document.querySelectorAll(".unit-btn").forEach(btn => {
 
-  const handler = () => {
+  const handler = (e) => {
+    e.preventDefault();  // ★ スマホで必須
     const target = btn.dataset.target;
 
     document.querySelectorAll(`.unit-btn[data-target="${target}"]`)
@@ -109,9 +112,10 @@ document.querySelectorAll(".unit-btn").forEach(btn => {
     if (target === "drinkUnit") selectedDrinkUnit = btn.dataset.unit;
   };
 
+  btn.addEventListener("touchstart", handler, { passive: false });
   btn.addEventListener("click", handler);
-  btn.addEventListener("touchstart", handler);
 });
+
 
 
   /* =========================
