@@ -132,6 +132,9 @@ document.querySelectorAll(".unit-btn").forEach(btn => {
   });
 });
 
+
+
+console.log("food button", document.getElementById("addFoodLogBtn"));
 /* 食べ物ログ */
 document.getElementById("addFoodLogBtn").addEventListener("click", () => {
   const name = foodName.value.trim();
@@ -382,5 +385,7 @@ resetAppBtn.addEventListener("click", () => {
   renderLogList();
 });
 
-
+renderLogList();
+renderDashboard();
+renderReport();
 
