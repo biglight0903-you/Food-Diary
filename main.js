@@ -53,6 +53,54 @@ document.querySelectorAll(".tab-button").forEach(btn => {
   });
 });
 
+/* =========================
+   DOM取得
+========================= */
+
+const foodName = document.getElementById("foodName");
+const foodAmount = document.getElementById("foodAmount");
+const foodBulk = document.getElementById("foodBulk");
+
+const drinkName = document.getElementById("drinkName");
+const drinkAmount = document.getElementById("drinkAmount");
+const drinkBulk = document.getElementById("drinkBulk");
+
+const miscText = document.getElementById("miscText");
+
+const logList = document.getElementById("logList");
+
+const dashboardDateInfo = document.getElementById("dashboardDateInfo");
+const dashboardContent = document.getElementById("dashboardContent");
+
+const reportDateInfo = document.getElementById("reportDateInfo");
+const reportContent = document.getElementById("reportContent");
+
+const guideContent = document.getElementById("guideContent");
+
+/* Settings */
+const targetWater = document.getElementById("targetWater");
+const targetSteps = document.getElementById("targetSteps");
+const coffeeLimit = document.getElementById("coffeeLimit");
+const lateSnackAlert = document.getElementById("lateSnackAlert");
+
+const d3Dose = document.getElementById("d3Dose");
+const multiDose = document.getElementById("multiDose");
+const omegaDose = document.getElementById("omegaDose");
+const zincDose = document.getElementById("zincDose");
+const mgDose = document.getElementById("mgDose");
+const proteinDose = document.getElementById("proteinDose");
+
+const notify18 = document.getElementById("notify18");
+const notify21 = document.getElementById("notify21");
+const notify22 = document.getElementById("notify22");
+
+const backupBtn = document.getElementById("backupBtn");
+const restoreBtn = document.getElementById("restoreBtn");
+const restoreFile = document.getElementById("restoreFile");
+
+const clearTodayBtn = document.getElementById("clearTodayBtn");
+const clearAllLogsBtn = document.getElementById("clearAllLogsBtn");
+const resetAppBtn = document.getElementById("resetAppBtn");
 
 /* =========================
    Part2: ログ追加（v11）
