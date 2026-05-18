@@ -164,8 +164,7 @@ getEl("addDrinkLogBtn")?.addEventListener("click", () => {
   drinkBulk.value = "";
 });
 
-getEl("addMiscLogBtn")?.addEventListener("click", () => {
-
+getEl("addMiscLogBtn2")?.addEventListener("click", () => {
   const misc = miscText.value.trim();
   if (!misc && !selectedCategory) return;
 
@@ -179,6 +178,7 @@ getEl("addMiscLogBtn")?.addEventListener("click", () => {
 
   miscText.value = "";
 });
+
 
 /* =========================
    表示系
