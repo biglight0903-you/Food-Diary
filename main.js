@@ -82,28 +82,37 @@ document.addEventListener("DOMContentLoaded", () => {
      カテゴリ・単位
   ========================= */
 
-  document.querySelectorAll(".log-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".log-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedCategory = btn.dataset.category || "";
-    });
-  });
+document.querySelectorAll(".log-btn").forEach(btn => {
 
-  document.querySelectorAll(".unit-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+  const handler = () => {
+    document.querySelectorAll(".log-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedCategory = btn.dataset.category || "";
+  };
 
-      const target = btn.dataset.target;
+  btn.addEventListener("click", handler);
+  btn.addEventListener("touchstart", handler);
+});
 
-      document.querySelectorAll(`.unit-btn[data-target="${target}"]`)
-        .forEach(b => b.classList.remove("active"));
 
-      btn.classList.add("active");
+document.querySelectorAll(".unit-btn").forEach(btn => {
 
-      if (target === "foodUnit") selectedFoodUnit = btn.dataset.unit;
-      if (target === "drinkUnit") selectedDrinkUnit = btn.dataset.unit;
-    });
-  });
+  const handler = () => {
+    const target = btn.dataset.target;
+
+    document.querySelectorAll(`.unit-btn[data-target="${target}"]`)
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    if (target === "foodUnit") selectedFoodUnit = btn.dataset.unit;
+    if (target === "drinkUnit") selectedDrinkUnit = btn.dataset.unit;
+  };
+
+  btn.addEventListener("click", handler);
+  btn.addEventListener("touchstart", handler);
+});
+
 
   /* =========================
      ログ追加
