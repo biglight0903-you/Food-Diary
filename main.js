@@ -330,7 +330,7 @@ document.querySelectorAll("#tab-settings input").forEach(input => {
 });
 
 /* バックアップ */
-backupBtn.addEventListener("click", () => {
+if (backupBtn) backupBtn.addEventListener("click", () => {
   const data = { logs, settings };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -385,9 +385,12 @@ resetAppBtn.addEventListener("click", () => {
   renderLogList();
 });
 
-renderLogList();
-renderDashboard();
-renderReport();
+
 function renderGuide() {
   // iframe表示なので何もしない
 }
+
+
+renderLogList();
+renderDashboard();
+renderReport();
