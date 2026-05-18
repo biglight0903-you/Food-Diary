@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>減量システム設計書</title>
+    <style>
+        :root {
+            --primary: #1f2933;
+            --secondary: #2ecc71;
+            --accent: #e67e22;
+            --danger: #e74c3c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+            --muted: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1f2933, #34495e);
+            color: #fff;
+            padding: 24px 20px;
+            border-radius: 12px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            font-size: 13px;
+            color: #d0d7de;
+        }
+
+        h2 {
+            margin: 32px 0 16px;
+            font-size: 18px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2::before {
+            content: "";
+            width: 5px;
+            height: 22px;
+            border-radius: 4px;
+            background: var(--secondary);
+        }
+
+        .section-note {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: -8px;
+            margin-bottom: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #ecf0f1;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .desc {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 4px 0 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 18px;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .time-col {
+            font-weight: bold;
+            color: var(--secondary);
+            width: 22%;
+            white-space: nowrap;
+        }
+
+        .box {
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .box-info {
+            background: #eef2f7;
+            border-left: 4px solid #5c6bc0;
+        }
+
+        .box-success {
+            background: #e8f6ef;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .box-warning {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+        }
+
+        .box-danger {
+            background: #fdf2f2;
+            border-left: 4px solid var(--danger);
+        }
+
+        .param-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 6px 0 0;
+            font-size: 13px;
+        }
+
+        .param-list li {
+            margin-bottom: 4px;
+        }
+
+        .param-list li::before {
+            content: "•";
+            color: var(--secondary);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: #ffffff;
+            }
+            header {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>減量システム設計書</h1>
+        <p>朝の代謝ブースト × 炎症コントロール × 睡眠自動化 × サプリ運用最適化</p>
+    </header>
+
+    <!-- 1. コア思想 -->
+    <h2>1. コア思想（SYSTEM PHILOSOPHY）</h2>
+    <div class="box box-info">
+        <div>・迷ったらプロテインを選択する。</div>
+        <div>・夜は糖質を入れず、睡眠中の脂肪燃焼を妨げない。</div>
+        <div>・炎症を抑えることで、減量スピードと体調を両立させる。</div>
+        <div>・睡眠の質が、翌日の食欲・代謝・意思決定を左右する。</div>
+        <div>・例外処理（外食・酒・食べすぎ）をあらかじめ設計しておく。</div>
+    </div>
+
+    <!-- 2. サプリメント運用 -->
+    <h2>2. サプリメント運用（タイミングと食前食後）</h2>
+    <p class="section-note">※「食後」は、食事の最後〜30分以内を想定。</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">朝（朝食後）</span>
+                <span class="tag">代謝スイッチ</span>
+            </div>
+            <ul class="param-list">
+                <li>ビタミンD3：1粒（脂溶性のため食後）</li>
+                <li>マルチビタミン：1粒（朝の栄養ベース）</li>
+            </ul>
+            <p class="note">朝食の卵・納豆・味噌汁と一緒に摂ることで吸収と安定感を高める。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">昼（昼食後）</span>
+                <span class="tag">炎症コントロール 前半</span>
+            </div>
+            <ul class="param-list">
+                <li>オメガ3：1粒（脂質と一緒に摂取）</li>
+            </ul>
+            <p class="note">昼の脂質と合わせることで、EPA/DHAの吸収効率を高める。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">夜（夕食後 or 夜のプロテイン後）</span>
+                <span class="tag">回復 × 炎症コントロール 後半</span>
+            </div>
+            <ul class="param-list">
+                <li>オメガ3：1粒（昼と分割して血中濃度を安定）</li>
+                <li>亜鉛：1粒（15〜30mg・夕食後）</li>
+            </ul>
+            <p class="note">亜鉛は胃への負担を避けるため、必ず食後に摂取する。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">就寝90分前</span>
+                <span class="tag">睡眠プロトコル</span>
+            </div>
+            <ul class="param-list">
+                <li>マグネシウム：1粒（200〜400mg）</li>
+            </ul>
+            <p class="note">食前食後は問わない。就寝90分前に固定することを最優先とする。</p>
+        </div>
+    </div>
+
+    <!-- 3. 1日の運用スケジュール -->
+    <h2>3. 1日の運用スケジュール（バッチ処理）</h2>
+    <table>
+        <tr>
+            <th>タイミング</th>
+            <th>実行内容</th>
+            <th>ポイント</th>
+        </tr>
+        <tr>
+            <td class="time-col">Morning（朝）</td>
+            <td>
+                卵2個＋納豆＋味噌汁＋プロテイン半スクープ<br>
+                ＋ ビタミンD3 1粒（食後）＋マルチビタミン1粒（食後）
+            </td>
+            <td>タンパク質約30gで代謝スイッチを入れ、血糖値と食欲を安定させる。</td>
+        </tr>
+        <tr>
+            <td class="time-col">Lunch（昼）</td>
+            <td>
+                鶏むね肉150g＋野菜＋白米少量（100〜150g）<br>
+                ＋ オメガ3 1粒（食後）
+            </td>
+            <td>仕事中の集中力維持と、炎症コントロールの前半戦を担う。</td>
+        </tr>
+        <tr>
+            <td class="time-col">Pre-Dinner（夕食前）</td>
+            <td>ゆで卵 or ヨーグルト（空腹が強い場合のみ）</td>
+            <td>夕食時の暴食を防ぐための“保険”として機能させる。</td>
+        </tr>
+        <tr>
+            <td class="time-col">Night（夜）</td>
+            <td>
+                プロテイン30g＋サイリウム3〜5g（水300〜400ml）<br>
+                ＋ オメガ3 1粒（夕食後 or プロテイン後）<br>
+                ＋ 亜鉛 1粒（夕食後）
+            </td>
+            <td>カロリーを抑えつつ満腹感を維持し、炎症と回復を同時にケアする。</td>
+        </tr>
+        <tr>
+            <td class="time-col">90min Before Sleep</td>
+            <td>スマホOFF／カフェイン終了／ぬるめのシャワー／マグネシウム1粒</td>
+            <td>睡眠の深さを確保し、翌日の食欲・代謝・メンタルを安定させる。</td>
+        </tr>
+    </table>
+
+    <!-- 4. 食べていい食品 -->
+    <h2>4. 許可食品リスト（優先度付き）</h2>
+    <div class="grid-3">
+        <div class="card">
+            <div class="card-title">最優先：タンパク質</div>
+            <p class="desc">
+                卵／納豆／豆腐／鶏むね肉／ヨーグルト<br>
+                タンパク質で満腹感と代謝を支える。
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">補助：整える食品</div>
+            <p class="desc">
+                味噌汁（具はわかめ・豆腐・きのこに固定）／野菜／海藻／キムチ<br>
+                ミネラル・食物繊維・腸内環境を整える。
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-title">制限付き：タイミング限定</div>
+            <p class="desc">
+                白米：昼のみ100〜150g<br>
+                フルーツ：朝のみ少量<br>
+                夜の糖質は原則禁止とする。
+            </p>
+        </div>
+    </div>
+
+    <!-- 5. 食事テンプレ -->
+    <h2>5. 食事テンプレート（迷わないための型）</h2>
+    <table>
+        <tr>
+            <th>タイミング</th>
+            <th>メニュー構成</th>
+        </tr>
+        <tr>
+            <td class="time-col">朝</td>
+            <td>卵＋納豆＋味噌汁＋プロテイン半スクープ</td>
+        </tr>
+        <tr>
+            <td class="time-col">昼</td>
+            <td>鶏むね肉＋野菜＋白米少量</td>
+        </tr>
+        <tr>
+            <td class="time-col">夜</td>
+            <td>プロテイン＋サイリウム（＋豆腐追加OK）</td>
+        </tr>
+        <tr>
+            <td class="time-col">間食</td>
+            <td>ゆで卵 or ヨーグルト</td>
+        </tr>
+    </table>
+
+    <!-- 6. 例外処理 -->
+    <h2>6. 例外処理プロトコル</h2>
+
+    <div class="box box-warning">
+        <strong>食べすぎた場合</strong><br>
+        ・翌日で調整する（完全断食は行わない）。<br>
+        ・タンパク質と水分を優先し、糖質と脂質を控えめにする。
+    </div>
+
+    <div class="box box-warning">
+        <strong>外食・酒が入った場合</strong><br>
+        ・酒は可能な限り蒸留酒＋水同量にする。<br>
+        ・翌日：納豆2パック＋水3Lを目安にする。<br>
+        ・翌朝：サイリウム水＋プロテイン10gで軽く整える（低血糖を避ける）。
+    </div>
+
+    <div class="box box-warning">
+        <strong>歩く時間が取れない日</strong><br>
+        ・エスカレーター禁止（階段を選択）。<br>
+        ・3階までは階段を使う。<br>
+        ・可能なら1駅手前で降りる。<br>
+        ・それも難しい日は、1分HIIT（20秒全力×2セット）を実行する。
+    </div>
+
+    <!-- 7. 効果 -->
+    <h2>7. 期待される変化（KPI）</h2>
+    <table>
+        <tr>
+            <th>経過期間</th>
+            <th>変化</th>
+        </tr>
+        <tr>
+            <td class="time-col">3日</td>
+            <td>空腹感が弱まり、間食欲求が減る。</td>
+        </tr>
+        <tr>
+            <td class="time-col">1週間</td>
+            <td>食欲が安定し、暴食が減る。</td>
+        </tr>
+        <tr>
+            <td class="time-col">2週間</td>
+            <td>体重・体脂肪が少しずつ減少し始める。</td>
+        </tr>
+        <tr>
+            <td class="time-col">1ヶ月</td>
+            <td>ルーチンが自動化され、「考えずに続けられる」状態になる。</td>
+        </tr>
+    </table>
+
+    <!-- 8. 摂取量パラメータ -->
+    <h2>8. 摂取量パラメータ（固定化）</h2>
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-title">プロテイン</div>
+            <ul class="param-list">
+                <li>1回：30g（水300ml）</li>
+                <li>夜置換：1〜2回まで許容</li>
+            </ul>
+            <p class="note">空腹時・迷った時は、まずプロテインを優先する。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">サイリウム</div>
+            <ul class="param-list">
+                <li>1回：3gから開始し、慣れたら5gへ</li>
+                <li>水：300〜400ml以上と一緒に摂取</li>
+                <li>プロテインと同時 or 直前に飲む</li>
+            </ul>
+            <p class="note">必ずすぐに飲み切る。放置するとゲル化して飲みにくくなる。</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">食品パラメータ</div>
+            <ul class="param-list">
+                <li>卵：1日 2〜4個</li>
+                <li>納豆：1日 1パック（朝固定）</li>
+                <li>豆腐：夜に150〜300gまで追加OK</li>
+                <li>白米：昼のみ100〜150g</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">サプリメント規定量</div>
+            <ul class="param-list">
+                <li>マルチビタミン：1~2粒（朝食後）</li>
+                <li>ビタミンD3：1粒（朝食後）5000IU</li>
+                <li>オメガ3：1粒（昼食後）＋1粒（夕食後 or 夜のプロテイン後）1~2粒</li>
+                <li>亜鉛：1粒（夕食後）15~30mg</li>
+                <li>マグネシウム：1粒（就寝90分前）200〜400mg</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 9. クリティカルルール -->
+    <h2>9. クリティカルルール</h2>
+    <div class="box box-danger">
+        <div>・夜間（夕食以降）の糖質入力は原則禁止とする。</div>
+        <div>・空腹シグナルは「水」または「タンパク質」で処理する。</div>
+        <div>・迷ったらプロテインを追加する。</div>
+        <div>・完璧さよりも「続けられること」を最優先とする。</div>
+    </div>
+    
+    <!-- 10. 1日の運用マップ（夜の量で変わる可変プロトコル） -->
+    <h2>10. 1日の運用マップ（夜の量で変わる可変プロトコル）</h2>
+    <p class="section-note">※前日の「夜の食事量」によって、翌朝のボリュームを調整する。</p>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Aパターン：前夜しっかり食べた翌日</span>
+                <span class="tag">朝は軽く</span>
+            </div>
+            <ul class="param-list">
+                <li><strong>朝食：</strong>プロテイン10〜15g＋水300ml（＋サイリウム3g任意）</li>
+                <li><strong>サプリ：</strong>ビタミンD3 1粒（食後扱い）／マルチビタミン 1粒</li>
+                <li><strong>目的：</strong>最低限のタンパク質と代謝スイッチだけ入れて、胃腸を休ませる。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Bパターン：前夜が軽かった翌日</span>
+                <span class="tag">朝はしっかり</span>
+            </div>
+            <ul class="param-list">
+                <li><strong>朝食：</strong>卵2個＋納豆＋味噌汁＋プロテイン15〜30g</li>
+                <li><strong>サプリ：</strong>ビタミンD3 1粒／マルチビタミン 1粒（いずれも朝食後）</li>
+                <li><strong>目的：</strong>血糖値と食欲を安定させ、1日の土台を作る。</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 style="font-size:15px; margin-top:20px;">昼〜夜の共通ルール</h3>
+    <table>
+        <tr>
+            <th>タイミング</th>
+            <th>食事</th>
+            <th>サプリ</th>
+            <th>ポイント</th>
+        </tr>
+        <tr>
+            <td class="time-col">昼（15〜16時目安）</td>
+            <td>鶏むね肉 or 卵 or 豆腐＋野菜＋白米少量（〜100g）</td>
+            <td>オメガ3：1粒（食後）</td>
+            <td>遅い時間なので「軽く・タンパク質中心」。夜に響かせない。</td>
+        </tr>
+        <tr>
+            <td class="time-col">夜10時前後（小腹が空いたら）</td>
+            <td>ヨーグルト／ゆで卵／豆腐／プロテイン15〜20g から1〜2つ</td>
+            <td>オメガ3：1粒（食後 or プロテイン後）／亜鉛：1粒（食後）</td>
+            <td>糖質は入れない。睡眠の質を優先しつつ、空腹だけ処理する。</td>
+        </tr>
+        <tr>
+            <td class="time-col">就寝90分前</td>
+            <td>カフェインなし・スマホOFF・ぬるめのシャワー</td>
+            <td>マグネシウム：1粒（200〜400mg）</td>
+            <td>睡眠の深さを確保し、翌日の食欲・メンタルを安定させる。</td>
+        </tr>
+    </table>
+
+</div>
+</body>
+
+</div> <!-- container -->
+</body>
+
+<style>
+.highlight {
+    color: #e74c3c;
+    font-weight: bold;
+}
+</style>
+
+<script>
+const words = ["ビタミンD3", "マルチビタミン", "オメガ3", "亜鉛", "マグネシウム", "サイリウム","プロテイン"];
+
+document.body.innerHTML = document.body.innerHTML.replace(
+    new RegExp(words.join("|"), "g"),
+    match => `<span class="highlight">${match}</span>`
+);
+</script>
+
+</html>
+</html>
